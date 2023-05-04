@@ -20,21 +20,53 @@ class InscriptionContainer extends StatefulWidget {
 }
 
 class _InscriptionContainerState extends State<InscriptionContainer> {
+  final _formInscr = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: const TextField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Email',
-              ),
-            ),
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          child: Column(
+            children: [
+              Expanded(child: Container()),
+              Form(
+                key: _formInscr,
+                child: Column(
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Email',
+                      ),
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Pseudo',
+                      ),
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Telephone',
+                      ),
+                    ),
+                    TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Mot de passe',
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('Inscrire'),
+                    )
+                  ],
+                ),
+              )
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
