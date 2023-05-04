@@ -37,8 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            BoutonAccueil(ConnexionPage(), "Connexion"),
-            BoutonAccueil(InscriptionPage(), "Inscription"),
+            BoutonAccueil(const ConnexionPage(), "Connexion"),
+            BoutonAccueil(const InscriptionPage(), "Inscription"),
           ],
         ),
       ),
