@@ -4,19 +4,20 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const shortid = require("shortid");
 const signUp = async (req, res) => {
-  const { pseudo, email, password } = req.body;
-  if (!pseudo || !email || !password) {
+  const { pseudo, email, passwordUser, telephone } = req.body;
+  if (!pseudo || !email || !passwordUser) {
      return res.status(StatusCodes.BAD_REQUEST).json({
         message: "Information impossible",
      });
   }
 
-  const passwordUser = await bcrypt.hash(password, 10);
- 
+  const passwordContr = await bcrypt.hash(passwordUser, 10);
+  
   const userData = {
      pseudo,
      email,
-     passwordUser,
+     passwordUser: passwordContr,
+     telephone,
   };
 
   const user = await User.findOne({ email });
@@ -30,7 +31,7 @@ const signUp = async (req, res) => {
      else
        res
         .status(StatusCodes.CREATED)
-        .json({ message: "L'utilisateur à été crée avec succès" });
+        .json({ message: "L'utilisateur a été crée avec succès" });
      });
     }
 };
@@ -38,27 +39,32 @@ const signIn = async (req, res) => {
   try {
      if (!req.body.email || !req.body.passwordUser) {
         res.status(StatusCodes.BAD_REQUEST).json({
-           message: "Please enter email and password",
+           message: "Entrez un email et une mot de passe",
         });
      }
  
      const user = await User.findOne({ email: req.body.email });
     
      if (user) {
-     if (user.authenticate(req.body.passwordUser)) {
-           const token = jwt.sign(
-              { _id: user._id, pseudo: user.pseudo },
-              process.env.JWT_SECRET,{ expiresIn: "30d"});
-  const { _id, pseudo, email } = user;
-  res.status(StatusCodes.OK).json({
-       token,
-       user: { _id, pseudo, email },
-  });
- } else {
-  res.status(StatusCodes.UNAUTHORIZED).json({
-     message: "Mauvais informations!",
-  });
- }
+      const passwordHash = await bcrypt.hash(req.body.passwordUser, 10);
+      bcrypt.compare(req.body.passwordUser, passwordHash, function(err, passwordMatch){
+         if(passwordMatch) {
+            const token = jwt.sign(
+               { _id: user._id, pseudo: user.pseudo },
+               process.env.JWT_SECRET_KEY,{ expiresIn: "30d"}
+            );
+            const { _id, pseudo, email } = user;
+            res.status(StatusCodes.OK).json({
+                  token,
+                  user: { _id, pseudo, email },
+            });
+         }
+         else{
+            res.status(StatusCodes.UNAUTHORIZED).json({
+               message: "Mauvais informations!",
+            });   
+         }
+      })
 } else {
   res.status(StatusCodes.BAD_REQUEST).json({
       message: "L'utilisation n'existe pas",
@@ -68,4 +74,4 @@ const signIn = async (req, res) => {
    res.status(StatusCodes.BAD_REQUEST).json({ error });
   }
 };
-module.exports = { signUp, signIn};
+module.exports = { signUp, signIn };
