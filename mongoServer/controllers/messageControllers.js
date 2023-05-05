@@ -46,7 +46,7 @@ const signIn = async (req, res) => {
      const user = await User.findOne({ email: req.body.email });
     
      if (user) {
-      const passwordHash = await bcrypt.hash(req.body.passwordUser, 10);
+      const passwordHash = user.passwordUser;
       bcrypt.compare(req.body.passwordUser, passwordHash, function(err, passwordMatch){
          if(passwordMatch) {
             const token = jwt.sign(
