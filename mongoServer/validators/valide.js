@@ -5,15 +5,15 @@ const { StatusCodes } = require("http-status-codes");
 const validateSignUpRequest = [
 check("pseudo").notEmpty().withMessage("Vous devez definir un Pseudo"),
 check("email").isEmail().withMessage("Votre email n'est pas valide"),
-check("password")
-   .isLength({ min: 6 })
-   .withMessage("Votre mot de passe doit avoir au minimum 6 caractères"),
+// check("password")
+//    .isLength({ min: 6 })
+//    .withMessage("Votre mot de passe doit avoir au minimum 6 caractères"),
 ];
 const validateSignIpRequest = [
 check("email").isEmail().withMessage("Votre email n'est pas valide"),
-check("password")
-    .isLength({ min: 6 })
-    .withMessage("Votre mot de passe doit avoir au minimum 6 caractères"),
+// check("password")
+//     .isLength({ min: 6 })
+//     .withMessage("Votre mot de passe doit avoir au minimum 6 caractères"),
 ]
 const isRequestValidated = (req, res, next) => {
   const errors = validationResult(req);
