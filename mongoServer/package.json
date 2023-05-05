@@ -4,7 +4,7 @@
   "description": "Server NodeJS MongoDB pour l'application MessageHDM",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
