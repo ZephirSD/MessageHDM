@@ -4,6 +4,7 @@ const { StatusCodes } = require("http-status-codes");
 
 const validateSignUpRequest = [
 check("pseudo").notEmpty().withMessage("Vous devez definir un Pseudo"),
+check("email").notEmpty().withMessage("Vous devez definir un Email"),
 check("email").isEmail().withMessage("Votre email n'est pas valide"),
 // check("password")
 //    .isLength({ min: 6 })
@@ -21,7 +22,7 @@ const isRequestValidated = (req, res, next) => {
   if (errors.array().length > 0) {
       return res
               .status(StatusCodes.BAD_REQUEST)
-              .json({ error: errors.array()[0].msg });
+              .json({ message: errors.array()[0].msg });
   }
   next();
 };
