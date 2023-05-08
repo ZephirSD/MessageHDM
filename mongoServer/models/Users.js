@@ -23,9 +23,4 @@ const userSchema = new mongoose.Schema({
      type: String,
   },
 },{ timestamps: true });
-userSchema.method({
-  async authenticate(password) {
-     return bcrypt.compare(password, this.passwordUser);
-  },
-});
 module.exports = mongoose.model("utilisateurs", userSchema);
