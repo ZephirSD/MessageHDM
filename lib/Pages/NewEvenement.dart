@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:messagehdm/Composants/InputForm.dart';
 import 'package:messagehdm/Pages/EvenementAccueil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import '../Composants/InputDate.dart';
 import '../Composants/NavHomeBottom.dart';
+import 'package:intl/intl.dart';
 
 class NewEventPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [const Locale('fr')],
+      supportedLocales: const [Locale('fr')],
       home: NewEventContainer(),
       debugShowCheckedModeBanner: false,
     );
@@ -27,13 +29,15 @@ class NewEventContainer extends StatefulWidget {
 
 class _NewEventContainerState extends State<NewEventContainer> {
   int _selectedIndex = 0;
+  DateTime? _selectedDateDeb = null;
+  DateTime? _selectedDateFin = null;
   final _formEvent = GlobalKey<FormState>();
   final _nomEvent = TextEditingController();
   final _dateDeb = TextEditingController();
   final _dateFin = TextEditingController();
   String selectedValue = "public";
   List<DropdownMenuItem<String>> get dropdownItems {
-    List<DropdownMenuItem<String>> menuItems = [
+    List<DropdownMenuItem<String>> menuItems = const [
       DropdownMenuItem(child: Text("Public"), value: "public"),
       DropdownMenuItem(child: Text("Privé"), value: "prive"),
     ];
@@ -80,44 +84,16 @@ class _NewEventContainerState extends State<NewEventContainer> {
                 child: Column(
                   children: [
                     InputForm("Nom de l'évènement",
-                        Icon(Icons.text_fields_sharp), _nomEvent),
-                    TextField(
-                      controller: _dateDeb,
-                      decoration: const InputDecoration(
-                          icon: Icon(Icons.calendar_today),
-                          labelText: "Date de début de l'inscription"),
-                      readOnly: true,
-                      onTap: () async {
-                        showDatePicker(
-                          context: context,
-                          locale: const Locale("fr", "FR"),
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2200),
-                        );
-                      },
-                    ),
-                    TextField(
-                      controller: _dateFin,
-                      decoration: const InputDecoration(
-                          icon: Icon(Icons.calendar_today),
-                          labelText: "Date de fin de l'inscription"),
-                      readOnly: true,
-                      onTap: () async {
-                        showDatePicker(
-                          context: context,
-                          locale: const Locale("fr", "FR"),
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2200),
-                        );
-                      },
-                    ),
+                        const Icon(Icons.text_fields_sharp), _nomEvent),
+                    InputDate(_dateDeb, _selectedDateDeb,
+                        "Date de début de l'inscription"),
+                    InputDate(_dateFin, _selectedDateFin,
+                        "Date de fin de l'inscription"),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 15),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 15),
                           child: Text("Mode de l'évènement"),
                         ),
                         Padding(
@@ -136,7 +112,7 @@ class _NewEventContainerState extends State<NewEventContainer> {
                     ),
                     ElevatedButton(
                       onPressed: () => {},
-                      child: Text("Créer"),
+                      child: const Text("Créer"),
                     )
                   ],
                 ),
