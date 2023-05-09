@@ -67,7 +67,7 @@ const signIn = async (req, res) => {
       })
 } else {
   res.status(StatusCodes.BAD_REQUEST).json({
-      message: "L'utilisation n'existe pas",
+      message: "L'utilisateur n'existe pas",
   });
 }
 } catch (error) {
