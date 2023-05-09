@@ -43,6 +43,10 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
           _selectedIndex,
           changeSelect: () => changeSelect,
         ),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+        ),
         body: Column(
           children: [
             Padding(

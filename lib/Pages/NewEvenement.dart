@@ -51,6 +51,10 @@ class _NewEventContainerState extends State<NewEventContainer> {
       bottomNavigationBar: NavHomeBottom(
         _selectedIndex,
       ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+      ),
       body: Column(
         children: [
           Padding(
