@@ -7,7 +7,7 @@ const getEvents = ((req, res) => {
 })
 
 const getOneEvent = ((req, res) => {
-    Evenements.find({_id: req.body.eventID})
+    Evenements.find({_id: req.params.eventID})
         .then(result => res.status(200).json({ result }))
         .catch(error => res.status(500).json({msg: error}))
 })
