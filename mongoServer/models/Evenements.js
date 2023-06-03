@@ -1,22 +1,22 @@
 const mongoose = require("mongoose");
 const eventSchema = new mongoose.Schema({
-  nomEvent: {
+  nom_event: {
      type: String,
      require: true,
   },
-  dateDebut: {
+  date_debut: {
      type: Date,
      require: true,
   },
-  dateFin: {
+  date_fin: {
      type: Date,
      require: true,
   },
-  modeEvent: {
+  mode_event: {
      type: Boolean,
      require: true,
   },
-  createEvent: {
+  create_event: {
     type: String,
   }
 },{ timestamps: true });
