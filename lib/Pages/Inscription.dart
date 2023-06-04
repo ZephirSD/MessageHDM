@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:messagehdm/Pages/Connexion.dart';
-import 'package:messagehdm/Pages/EvenementAccueil.dart';
 import 'dart:convert';
 import '../Composants/InputForm.dart';
 
