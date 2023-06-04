@@ -264,6 +264,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  session_next:
+    dependency: "direct main"
+    description:
+      name: session_next
+      sha256: "774f138f1131fea8f43165cc5690492eacc1990452bde7e9999346af6d7d682b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   sky_engine:
     dependency: transitive
     description: flutter
