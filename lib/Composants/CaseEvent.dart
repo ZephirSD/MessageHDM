@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class CaseEvent extends StatelessWidget {
   final String title;
-  final int index;
-  CaseEvent(this.title, this.index);
+  // final int index;
+  CaseEvent(this.title);
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class CaseEvent extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
       child: GestureDetector(
         onTap: () {
-          print('test${index}');
+          print(title);
         },
         child: Container(
           height: 150,
