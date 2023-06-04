@@ -13,8 +13,7 @@ const eventSchema = new mongoose.Schema({
      require: true,
   },
   mode_event: {
-     type: Boolean,
-     require: true,
+     type: String,
   },
   create_event: {
     type: String,
