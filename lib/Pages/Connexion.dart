@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:messagehdm/Pages/EvenementAccueil.dart';
+import 'package:messagehdm/Pages/SwitchPage.dart';
 import '../Composants/InputForm.dart';
+import 'package:session_next/session_next.dart';
 
 class ConnexionPage extends StatelessWidget {
   const ConnexionPage({super.key});
@@ -25,6 +26,7 @@ class ConnexionContainer extends StatefulWidget {
 }
 
 class _ConnexionContainerState extends State<ConnexionContainer> {
+  var session = SessionNext();
   final _formConnex = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _passwordUser = TextEditingController();
@@ -36,8 +38,6 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
   }
 
   connect() async {
-    // print(_email.text);
-    // print(_passwordUser.text);
     var body = {
       "email": _email.text,
       "passwordUser": _passwordUser.text,
@@ -51,11 +51,18 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
       print(response.statusCode);
       var message = json.decode(response.body);
       if (response.statusCode == 200) {
-        print(message["token"]);
+        session.setAll({
+          'tokenUser': message["token"],
+          'pseudoUser': message["user"]["pseudo"],
+          'idUser': message["user"]["_id"]
+        });
+        print(session.get("idUser"));
+        print(session.get("tokenUser"));
+        print(session.get("pseudoUser"));
         clearControllers();
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => EventPageAccueil()),
+          MaterialPageRoute(builder: (context) => SwitchPage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
