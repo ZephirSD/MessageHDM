@@ -1,52 +1,48 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:messagehdm/Composants/NavHomeBottom.dart';
+import 'package:messagehdm/Composants/Evenements/evenements_class.dart';
 import '../Composants/CaseEvent.dart';
 import 'NewEvenement.dart';
+import 'package:http/http.dart' as http;
+import 'package:session_next/session_next.dart';
 
 class EventPageAccueil extends StatelessWidget {
-  const EventPageAccueil({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: EventContainerAccueil(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class EventContainerAccueil extends StatefulWidget {
-  const EventContainerAccueil({super.key});
+final String _rpcUrl =
+    Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
 
+class EventContainerAccueil extends StatefulWidget {
   @override
   State<EventContainerAccueil> createState() => _EventContainerAccueilState();
 }
 
 class _EventContainerAccueilState extends State<EventContainerAccueil> {
-  int _selectedIndex = 0;
-  final List listEvent = [
-    "Event1",
-    "Event2",
-    "Event3",
-  ];
-  changeSelect(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  var session = SessionNext();
+  var url = Uri.parse('${_rpcUrl}/api/evenements/');
+
+  Future<List<Evenements>> fetchEvenement() async {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      return Evenements.fromJsonList(json.decode(response.body));
+    } else {
+      throw Exception('Request Failed.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.blueGrey,
-        bottomNavigationBar: NavHomeBottom(
-          _selectedIndex,
-          changeSelect: () => changeSelect,
-        ),
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-        ),
         body: Column(
           children: [
             Padding(
@@ -54,8 +50,8 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Bonjour',
+                  Text(
+                    'Bonjour ${session.get("pseudoUser")}',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -89,13 +85,24 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
               ),
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: listEvent.length,
-                itemBuilder: (context, index) {
-                  return CaseEvent(listEvent[index], index + 1);
+              child: FutureBuilder(
+                future: fetchEvenement(),
+                builder: (context, AsyncSnapshot<List<Evenements>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.data == null) {
+                      return const Center(child: Text('Something went wrong'));
+                    }
+
+                    return ListView.builder(
+                        itemCount: snapshot.data?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          return CaseEvent(snapshot.data![index].nomEvent);
+                        });
+                  }
+                  return const CircularProgressIndicator();
                 },
               ),
-            ),
+            )
           ],
         ));
   }
