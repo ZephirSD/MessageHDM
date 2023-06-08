@@ -2,22 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:messagehdm/Composants/BoutonAccueil.dart';
 import 'package:messagehdm/Pages/Connexion.dart';
 import 'package:messagehdm/Pages/Inscription.dart';
+import 'package:messagehdm/Pages/SwitchPage.dart';
+import 'package:session_next/session_next.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  var session = SessionNext();
+
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Message HDM',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      // home: MyHomePage(),
+      home: session.get("tokenUser") == null ? MyHomePage() : SwitchPage(),
       debugShowCheckedModeBanner: false,
     );
   }
