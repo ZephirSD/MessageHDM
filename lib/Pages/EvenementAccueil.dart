@@ -71,10 +71,13 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
                         ),
                       ),
                       onPressed: () => {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => NewEventPage(),
+                          PageRouteBuilder(
+                            pageBuilder: (context, animation1, animation2) =>
+                                NewEventPage(),
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
                           ),
                         ),
                       },
