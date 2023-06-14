@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:messagehdm/Pages/MessagePages.dart';
 
 class CaseEvent extends StatelessWidget {
   final String title;
-  // final int index;
   CaseEvent(this.title);
 
   @override
@@ -12,10 +12,22 @@ class CaseEvent extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           print(title);
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) =>
+                  MessagePage(title),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         },
         child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.deepPurple[400],
+          ),
           height: 150,
-          color: Colors.deepPurple[400],
           child: Center(
             child: Text(
               title,
