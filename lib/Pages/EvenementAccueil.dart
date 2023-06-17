@@ -71,7 +71,7 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
                         ),
                       ),
                       onPressed: () => {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           PageRouteBuilder(
                             pageBuilder: (context, animation1, animation2) =>
@@ -99,7 +99,8 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
                     return ListView.builder(
                         itemCount: snapshot.data?.length ?? 0,
                         itemBuilder: (context, index) {
-                          return CaseEvent(snapshot.data![index].nomEvent);
+                          return CaseEvent(snapshot.data![index].nomEvent,
+                              snapshot.data![index].idEvent);
                         });
                   }
                   return const CircularProgressIndicator();
