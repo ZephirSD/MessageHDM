@@ -3,7 +3,8 @@ import 'package:messagehdm/Pages/MessagePages.dart';
 
 class CaseEvent extends StatelessWidget {
   final String title;
-  CaseEvent(this.title);
+  final String idEvent;
+  CaseEvent(this.title, this.idEvent);
 
   @override
   Widget build(BuildContext context) {
@@ -12,15 +13,10 @@ class CaseEvent extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           print(title);
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation1, animation2) =>
-                  MessagePage(title),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
+          session.set('event', idEvent);
+          print(session.get('event'));
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => MessagePage(title)));
         },
         child: Container(
           decoration: BoxDecoration(
