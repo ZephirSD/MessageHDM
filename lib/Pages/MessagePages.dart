@@ -25,9 +25,9 @@ class MessagePage extends StatelessWidget {
 final String _rpcUrl =
     Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
 var session = SessionNext();
-var eventString = session.get('event');
-var url = Uri.parse('${_rpcUrl}/api/messages/${eventString}');
 Future<List<Messages>> fetchMessages() async {
+  var eventString = session.get('event');
+  var url = Uri.parse('${_rpcUrl}/api/messages/${eventString}');
   List<Messages> messages = [];
   messages.clear();
   final response = await http.get(url);
@@ -57,7 +57,7 @@ envoiMessage() async {
   var request =
       http.Request('POST', Uri.parse('http://localhost:8000/api/messages/'));
   request.body = json.encode({
-    "auteur": session.get("email"),
+    "auteur": session.get("pseudoUser"),
     "evenement": session.get("event"),
     "status": "lu",
     "texte": _messagesEnvoi.text,
@@ -91,13 +91,12 @@ class MessageHome extends StatefulWidget {
 }
 
 class _MessageHomeState extends State<MessageHome> {
-  final scrollController = ScrollController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blueGrey,
+          shadowColor: Colors.transparent,
           title: Text(widget.titreEvent),
           leading: ElevatedButton(
             onPressed: () => {
@@ -108,10 +107,9 @@ class _MessageHomeState extends State<MessageHome> {
                 ),
               ),
             },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(
-                Colors.blueGrey,
-              ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueGrey,
+              shadowColor: Colors.transparent,
             ),
             child: const Icon(Icons.arrow_back_ios),
           ),
@@ -132,7 +130,7 @@ class _MessageHomeState extends State<MessageHome> {
                           message.texte,
                           DateTime.parse(message.dateEnvoi),
                           message.auteur,
-                          session.get("email"));
+                          session.get("pseudoUser"));
                     },
                   ),
                 );
