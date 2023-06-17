@@ -1,7 +1,7 @@
 const Messages = require('../models/Messages');
 
 const getMessagesEvents = ((req, res) => {
-    Messages.find({evenements: req.body.eveneements})
+    Messages.find({evenement: req.params.eventID})
         .then(result => res.status(200).json({ result }))
         .catch(error => res.status(500).json({msg: error}))
 })
