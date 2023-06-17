@@ -11,7 +11,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   var session = SessionNext();
-
   MyApp({super.key});
 
   @override
@@ -21,7 +20,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: MyHomePage(),
       home: session.get("tokenUser") == null ? MyHomePage() : SwitchPage(),
       debugShowCheckedModeBanner: false,
     );
