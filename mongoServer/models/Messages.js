@@ -12,5 +12,8 @@ const messageSchema = new mongoose.Schema({
   texte: {
     type: String,
   },
+  date_envoi: {
+    type: Date,
+  }
 },{ timestamps: true });
 module.exports = mongoose.model("Messages", messageSchema);
