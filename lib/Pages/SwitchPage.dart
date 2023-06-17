@@ -3,6 +3,9 @@ import 'package:messagehdm/Composants/ChangePage.dart';
 // import 'package:messagehdm/Composants/NavHomeBottom.dart';
 import 'package:messagehdm/Pages/DocumentPage.dart';
 import 'package:messagehdm/Pages/EvenementAccueil.dart';
+import 'package:session_next/session_next.dart';
+
+import '../main.dart';
 
 class SwitchPage extends StatefulWidget {
   SwitchPage({super.key});
@@ -13,6 +16,19 @@ class SwitchPage extends StatefulWidget {
 
 class _SwitchPageState extends State<SwitchPage> {
   int _selectedIndex = 0;
+  var session = SessionNext();
+
+  logoutFunction() {
+    session.removeAll();
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => MyApp(),
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +70,16 @@ class _SwitchPageState extends State<SwitchPage> {
             }),
         appBar: AppBar(
           backgroundColor: Colors.blueGrey,
+          shadowColor: Colors.transparent,
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                logoutFunction();
+              },
+              child: Icon(Icons.logout),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[300]),
+            )
+          ],
         ),
       ),
     );
