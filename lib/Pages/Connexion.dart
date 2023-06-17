@@ -54,15 +54,25 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
         session.setAll({
           'tokenUser': message["token"],
           'pseudoUser': message["user"]["pseudo"],
-          'idUser': message["user"]["_id"]
+          'idUser': message["user"]["_id"],
+          'email': message["user"]["email"],
         });
         print(session.get("idUser"));
         print(session.get("tokenUser"));
         print(session.get("pseudoUser"));
+        print(session.get("email"));
         clearControllers();
-        Navigator.push(
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => SwitchPage()),
+        // );
+        Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SwitchPage()),
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => SwitchPage(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
