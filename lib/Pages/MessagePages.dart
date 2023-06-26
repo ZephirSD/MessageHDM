@@ -166,7 +166,7 @@ class _MessageHomeState extends State<MessageHome> {
                         child: TextField(
                           controller: _messagesEnvoi,
                           decoration: InputDecoration(
-                              hintText: "Entrez le message...",
+                              hintText: "Entrez votre message...",
                               hintStyle: TextStyle(color: Colors.grey[500]),
                               border: InputBorder.none),
                         ),
