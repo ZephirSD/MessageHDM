@@ -30,10 +30,17 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
   var url = Uri.parse('${_rpcUrl}/api/evenements/');
 
   Future<List<Evenements>> fetchEvenement() async {
-    final response = await http.get(url);
+    var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
+    var request =
+        http.Request('GET', Uri.parse('http://127.0.0.1:8000/api/evenements'));
+
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    var streamReponse = await http.Response.fromStream(response);
 
     if (response.statusCode == 200) {
-      return Evenements.fromJsonList(json.decode(response.body));
+      return Evenements.fromJsonList(json.decode(streamReponse.body));
     } else {
       throw Exception('Request Failed.');
     }
@@ -50,12 +57,15 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Bonjour ${session.get("pseudoUser")}',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 30),
+                    child: Text(
+                      'Bonjour ${session.get("pseudoUser")}',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    ),
                   ),
                   SizedBox(
                     width: 50,
