@@ -30,9 +30,15 @@ Future<List<Messages>> fetchMessages() async {
   var url = Uri.parse('${_rpcUrl}/api/messages/${eventString}');
   List<Messages> messages = [];
   messages.clear();
-  final response = await http.get(url);
+  var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
+  var request = http.Request('GET', url);
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+  var streamReponse = await http.Response.fromStream(response);
+
   if (response.statusCode == 200) {
-    var jsonList = json.decode(response.body);
+    var jsonList = json.decode(streamReponse.body);
     if (jsonList["result"] is List<dynamic>) {
       for (final listMessages in jsonList["result"]) {
         messages.add(
@@ -53,25 +59,29 @@ Future<List<Messages>> fetchMessages() async {
 }
 
 envoiMessage() async {
-  var headers = {'Content-Type': 'application/json'};
-  var request =
-      http.Request('POST', Uri.parse('http://localhost:8000/api/messages/'));
-  request.body = json.encode({
-    "auteur": session.get("pseudoUser"),
-    "evenement": session.get("event"),
-    "status": "lu",
-    "texte": _messagesEnvoi.text,
-    "date_envoi": DateTime.now().toString()
-  });
-  request.headers.addAll(headers);
+  if (_messagesEnvoi.text.isNotEmpty) {
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${session.get('tokenUser')}'
+    };
+    var request =
+        http.Request('POST', Uri.parse('http://localhost:8000/api/messages'));
+    request.body = json.encode({
+      "auteur": session.get("pseudoUser"),
+      "evenement": session.get("event"),
+      "status": "lu",
+      "texte": _messagesEnvoi.text,
+      "date_envoi": DateTime.now().toString()
+    });
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
 
-  http.StreamedResponse response = await request.send();
-
-  if (response.statusCode == 200) {
-    _messagesEnvoi.clear();
-  } else {
-    print(response.reasonPhrase);
-    _messagesEnvoi.clear();
+    if (response.statusCode == 200) {
+      _messagesEnvoi.clear();
+    } else {
+      print(response.reasonPhrase);
+      _messagesEnvoi.clear();
+    }
   }
 }
 
