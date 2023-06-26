@@ -58,9 +58,9 @@ class BulleMessage extends StatelessWidget {
                   Text(
                     auteur == auteurSession ? "Vous" : auteur,
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 13,
-                    ),
+                        color: Colors.black,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 3),
