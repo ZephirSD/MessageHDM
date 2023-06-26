@@ -10,12 +10,34 @@ class InputForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: _controller,
-      obscureText: hiddenPassword,
-      decoration: InputDecoration(
-        labelText: textInput,
-        icon: iconInput,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.white, width: 2)),
+      child: TextFormField(
+        controller: _controller,
+        obscureText: hiddenPassword,
+        decoration: InputDecoration(
+          labelText: textInput,
+          labelStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+          ),
+          border: InputBorder.none,
+          // focusedBorder: OutlineInputBorder(
+          //   borderSide: BorderSide(
+          //     color: Colors.grey.shade300,
+          //     width: 2,
+          //   ),
+          //   borderRadius: BorderRadius.circular(25),
+          // ),
+          focusColor: Colors.white,
+          fillColor: Colors.white,
+          icon: iconInput,
+          iconColor: Colors.white,
+        ),
+        style: TextStyle(color: Colors.white, fontSize: 15),
       ),
     );
   }
