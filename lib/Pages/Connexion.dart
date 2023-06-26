@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Pages/SwitchPage.dart';
 import '../Composants/InputForm.dart';
 import 'package:session_next/session_next.dart';
+
+import '../main.dart';
 
 class ConnexionPage extends StatelessWidget {
   const ConnexionPage({super.key});
@@ -14,6 +17,8 @@ class ConnexionPage extends StatelessWidget {
     return MaterialApp(
       home: ConnexionContainer(),
       debugShowCheckedModeBanner: false,
+      color: Colors.blueGrey,
+      // color: Colors.blueGrey,
     );
   }
 }
@@ -88,37 +93,82 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          child: Column(
-            children: [
-              Expanded(
-                child: Container(
-                  color: Colors.blueGrey,
-                ),
+      appBar: AppBar(
+        backgroundColor: Colors.blueGrey,
+        shadowColor: Colors.transparent,
+        leading: ElevatedButton(
+          onPressed: () => {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) => MyApp(),
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
               ),
-              Form(
-                key: _formConnex,
-                child: Column(
-                  children: [
-                    InputForm("Email", Icon(Icons.email_rounded), _email),
-                    InputForm(
+            ),
+          },
+          child: Icon(Icons.arrow_back),
+        ),
+      ),
+      body: Container(
+        color: Colors.blueGrey,
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Form(
+              key: _formConnex,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 10),
+                    child:
+                        InputForm("Email", Icon(Icons.email_rounded), _email),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 10),
+                    child: InputForm(
                       "Mot de passe",
                       Icon(Icons.password_rounded),
                       _passwordUser,
                       hiddenPassword: true,
                     ),
-                    ElevatedButton(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25, vertical: 10),
+                    child: ElevatedButton(
                       onPressed: () {
                         connect();
                       },
-                      child: const Text('Se connecter'),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStatePropertyAll(Colors.deepPurple),
+                        shadowColor:
+                            MaterialStatePropertyAll(Colors.transparent),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 25, vertical: 5),
+                        child: const Text('Se connecter'),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
