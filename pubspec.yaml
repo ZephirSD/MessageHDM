@@ -31,9 +31,12 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   http: ^1.0.0
   intl: ^0.18.1
   session_next: ^0.1.0
+  simple_localization: ^2.0.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0
