@@ -11,6 +11,7 @@
 migrate_working_dir/
 /mongoServer/node_modules
 /mongoServer/.env
+/mongoServer/certificate
 
 # IntelliJ related
 *.iml
