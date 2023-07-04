@@ -1,4 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:messagehdm/Composants/CaseDocument.dart';
+import 'package:messagehdm/Composants/Documents/documents_class.dart';
+import 'package:session_next/session_next.dart';
+import 'package:http/http.dart' as http;
+
+final String _rpcUrl =
+    Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
 
 class DocumentPage extends StatelessWidget {
   @override
@@ -10,12 +19,34 @@ class DocumentPage extends StatelessWidget {
   }
 }
 
+var session = SessionNext();
+
 class DocumentHome extends StatefulWidget {
   @override
   State<DocumentHome> createState() => _DocumentHomeState();
 }
 
 class _DocumentHomeState extends State<DocumentHome> {
+  List<Documents> listDocuments = [];
+  Future<List<Documents>> fetchDocuments() async {
+    var url =
+        Uri.parse('${_rpcUrl}/api/documents/recents/${session.get("idUser")}');
+    var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
+    var request = http.Request('GET', url);
+    request.headers.addAll(headers);
+    listDocuments.clear();
+    http.StreamedResponse response = await request.send();
+    var streamReponse = await http.Response.fromStream(response);
+
+    if (response.statusCode == 200) {
+      // print(await response.stream.bytesToString());
+      return Documents.fromJsonList(json.decode(streamReponse.body));
+    } else {
+      print(response.reasonPhrase);
+      throw Exception('Request Failed.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +61,7 @@ class _DocumentHomeState extends State<DocumentHome> {
               child: Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
                 child: Text(
-                  'Document',
+                  'Documents',
                   textAlign: TextAlign.start,
                   style: TextStyle(
                     fontFamily: 'Lexend Deca',
@@ -111,12 +142,33 @@ class _DocumentHomeState extends State<DocumentHome> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Container(
                     height: 200,
-                    color: Colors.deepPurple,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: [],
+                    child: FutureBuilder(
+                      future: fetchDocuments(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<Documents>> snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          if (snapshot.data == null) {
+                            return const Center(
+                              child: Text('Aucune donnée reçu'),
+                            );
+                          }
+                          return ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.symmetric(horizontal: 25),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data?.length ?? 0,
+                              itemBuilder: (context, index) {
+                                return CaseDocuments(
+                                    snapshot.data![index].nomFichier,
+                                    snapshot.data![index].extensionFichier,
+                                    snapshot.data![index].idDoc,
+                                    snapshot.data![index].dataDocument);
+                              });
+                        }
+                        return Center(
+                          child: const CircularProgressIndicator(),
+                        );
+                      },
                     ),
                   ),
                 )
