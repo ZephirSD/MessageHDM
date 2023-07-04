@@ -32,7 +32,7 @@ class _InscriptionContainerState extends State<InscriptionContainer> {
   final _passwordUser = TextEditingController();
   final _telephone = TextEditingController();
   final String _rpcUrl =
-      Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+      Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
 
   clearControllers() {
     _email.clear();

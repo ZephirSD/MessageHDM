@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Pages/SwitchPage.dart';
@@ -36,7 +35,7 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
   final _email = TextEditingController();
   final _passwordUser = TextEditingController();
   final String _rpcUrl =
-      Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+      Platform.isAndroid ? '10.0.2.2:8000' : '127.0.0.1:8000';
   clearControllers() {
     _email.clear();
     _passwordUser.clear();
@@ -47,8 +46,8 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
       "email": _email.text,
       "passwordUser": _passwordUser.text,
     };
-    var url = Uri.parse('${_rpcUrl}/api/connec');
-    http
+    var url = Uri.https('${_rpcUrl}', '/api/connec');
+    await http
         .post(url,
             headers: {"Content-Type": "application/json"},
             body: json.encode(body))

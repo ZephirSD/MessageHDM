@@ -18,7 +18,7 @@ class EventPageAccueil extends StatelessWidget {
 }
 
 final String _rpcUrl =
-    Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+    Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
 
 class EventContainerAccueil extends StatefulWidget {
   @override
@@ -31,8 +31,7 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
 
   Future<List<Evenements>> fetchEvenement() async {
     var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
-    var request =
-        http.Request('GET', Uri.parse('http://127.0.0.1:8000/api/evenements'));
+    var request = http.Request('GET', url);
 
     request.headers.addAll(headers);
 
@@ -113,7 +112,9 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
                               snapshot.data![index].idEvent);
                         });
                   }
-                  return const CircularProgressIndicator();
+                  return Center(
+                    child: const CircularProgressIndicator(),
+                  );
                 },
               ),
             )
