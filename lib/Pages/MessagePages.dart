@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+// import 'package:flutter/scheduler.dart';
 import 'package:messagehdm/Composants/BulleMessage.dart';
 import 'package:messagehdm/Composants/Messages/messages_class.dart';
 import 'package:session_next/session_next.dart';
 import 'package:http/http.dart' as http;
+import '../Ressources/couleurs.dart';
 import 'EvenementAccueil.dart';
+import 'package:file_picker/file_picker.dart';
+// import 'package:open_app_file/open_app_file.dart';
 
 TextEditingController _messagesEnvoi = TextEditingController();
+ScrollController _scrollController = ScrollController();
 
 class MessagePage extends StatelessWidget {
   final String titreEvent;
@@ -23,11 +28,12 @@ class MessagePage extends StatelessWidget {
 }
 
 final String _rpcUrl =
-    Platform.isAndroid ? 'http://10.0.2.2:8000' : 'http://127.0.0.1:8000';
+    Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
 var session = SessionNext();
+PlatformFile? file;
 Future<List<Messages>> fetchMessages() async {
   var eventString = session.get('event');
-  var url = Uri.parse('${_rpcUrl}/api/messages/${eventString}');
+  var url = Uri.parse('$_rpcUrl/api/messages/$eventString');
   List<Messages> messages = [];
   messages.clear();
   var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
@@ -37,6 +43,12 @@ Future<List<Messages>> fetchMessages() async {
   http.StreamedResponse response = await request.send();
   var streamReponse = await http.Response.fromStream(response);
 
+  List<int> transformListBin(var value) {
+    List<dynamic> bufferDynamic = value;
+    List<int> bufferInt = bufferDynamic.map((e) => e as int).toList();
+    return bufferInt;
+  }
+
   if (response.statusCode == 200) {
     var jsonList = json.decode(streamReponse.body);
     if (jsonList["result"] is List<dynamic>) {
@@ -44,9 +56,11 @@ Future<List<Messages>> fetchMessages() async {
         messages.add(
           Messages(
             auteur: listMessages["auteur"],
-            texte: listMessages["texte"],
+            texte: listMessages["texte"] ?? "",
             dateEnvoi: listMessages["date_envoi"],
-            status: listMessages["status"],
+            document: listMessages["document"] != null
+                ? transformListBin(listMessages["document"]['data'])
+                : null,
             evenement: listMessages["evenement"],
           ),
         );
@@ -59,28 +73,52 @@ Future<List<Messages>> fetchMessages() async {
 }
 
 envoiMessage() async {
+  var headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${session.get('tokenUser')}'
+  };
   if (_messagesEnvoi.text.isNotEmpty) {
-    var headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${session.get('tokenUser')}'
-    };
-    var request =
-        http.Request('POST', Uri.parse('http://localhost:8000/api/messages'));
-    request.body = json.encode({
+    var requestMessage =
+        http.Request('POST', Uri.parse('$_rpcUrl/api/messages'));
+    requestMessage.body = json.encode({
       "auteur": session.get("pseudoUser"),
       "evenement": session.get("event"),
       "status": "lu",
       "texte": _messagesEnvoi.text,
       "date_envoi": DateTime.now().toString()
     });
-    request.headers.addAll(headers);
-    http.StreamedResponse response = await request.send();
+    requestMessage.headers.addAll(headers);
+    http.StreamedResponse response = await requestMessage.send();
 
     if (response.statusCode == 200) {
       _messagesEnvoi.clear();
     } else {
       print(response.reasonPhrase);
       _messagesEnvoi.clear();
+    }
+  } else if (file != null) {
+    File fileDire = File(file!.path.toString());
+    var requestMessage =
+        http.Request('POST', Uri.parse('$_rpcUrl/api/messages'));
+    requestMessage.body = json.encode({
+      "auteur": session.get("pseudoUser"),
+      "evenement": session.get("event"),
+      "date_envoi": DateTime.now().toString(),
+      "lien_fichier": file!.path.toString(),
+      "nom_fichier": fileDire.path.split('/').last.split('.').first,
+      "extension": fileDire.path.split('/').last.split('.').last.toLowerCase(),
+      "idUser": session.get("idUser"),
+    });
+    requestMessage.headers.addAll(headers);
+    http.StreamedResponse response = await requestMessage.send();
+
+    if (response.statusCode == 200) {
+      _messagesEnvoi.clear();
+      file = null;
+    } else {
+      print(response.reasonPhrase);
+      _messagesEnvoi.clear();
+      file = null;
     }
   }
 }
@@ -101,16 +139,28 @@ class MessageHome extends StatefulWidget {
 }
 
 class _MessageHomeState extends State<MessageHome> {
+  Future<void> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      setState(() {
+        file = result.files.first;
+      });
+      // file == null ? false : OpenAppFile.open(file!.path.toString());
+      print(file!.path.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: CouleursPrefs.couleurPrinc,
           shadowColor: Colors.transparent,
           title: Text(widget.titreEvent),
           leading: ElevatedButton(
             onPressed: () => {
               session.remove('event'),
+              file = null,
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => EventPageAccueil(),
@@ -118,7 +168,7 @@ class _MessageHomeState extends State<MessageHome> {
               ),
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueGrey,
+              backgroundColor: CouleursPrefs.couleurPrinc,
               shadowColor: Colors.transparent,
             ),
             child: const Icon(Icons.arrow_back_ios),
@@ -127,7 +177,7 @@ class _MessageHomeState extends State<MessageHome> {
         body: StreamBuilder(
             stream: getMessages(Duration(seconds: 1)),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData || snapshot.data != null) {
                 final messages = snapshot.data!;
                 return Padding(
                   padding: const EdgeInsets.all(20),
@@ -137,10 +187,12 @@ class _MessageHomeState extends State<MessageHome> {
                     itemBuilder: (context, index) {
                       final message = messages[index];
                       return BulleMessage(
-                          message.texte,
-                          DateTime.parse(message.dateEnvoi),
-                          message.auteur,
-                          session.get("pseudoUser"));
+                        message.texte,
+                        DateTime.parse(message.dateEnvoi),
+                        message.auteur,
+                        session.get("pseudoUser"),
+                        binaryImage: message.document,
+                      );
                     },
                   ),
                 );
@@ -150,7 +202,7 @@ class _MessageHomeState extends State<MessageHome> {
                   height: double.infinity,
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: Colors.blueGrey,
+                      color: CouleursPrefs.couleurPrinc,
                     ),
                   ),
                 );
@@ -158,48 +210,96 @@ class _MessageHomeState extends State<MessageHome> {
             }),
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(35.0),
-                      border: Border.all(color: Colors.blueGrey, width: 1)),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 30,
-                        height: 10,
+              file != null
+                  ? Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15.0),
+                        color: Colors.transparent,
                       ),
-                      Expanded(
-                        child: TextField(
-                          controller: _messagesEnvoi,
-                          decoration: InputDecoration(
-                              hintText: "Entrez votre message...",
-                              hintStyle: TextStyle(color: Colors.grey[500]),
-                              border: InputBorder.none),
-                        ),
+                      child: Image.asset(
+                        file!.path.toString(),
+                        fit: BoxFit.cover,
                       ),
-                    ],
+                    )
+                  : SizedBox(),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(35.0),
+                        border: Border.all(
+                            color: CouleursPrefs.couleurPrinc, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 15,
+                            height: 10,
+                          ),
+                          SizedBox(
+                            child: GestureDetector(
+                              onTap: () {
+                                pickFile();
+                              },
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5),
+                                child: const Icon(
+                                  Icons.file_present_sharp,
+                                  color: CouleursPrefs.couleurPrinc,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _messagesEnvoi,
+                              decoration: InputDecoration(
+                                  hintText: "Entrez votre message...",
+                                  hintStyle: TextStyle(color: Colors.grey[500]),
+                                  border: InputBorder.none),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(width: 15),
+                  Container(
+                    padding: const EdgeInsets.all(15.0),
+                    decoration: BoxDecoration(
+                        color: CouleursPrefs.couleurPrinc,
+                        shape: BoxShape.circle),
+                    child: InkWell(
+                      child: Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                      ),
+                      onTap: () {
+                        // SchedulerBinding.instance.addPostFrameCallback((_) {
+                        //   _scrollController.animateTo(
+                        //       _scrollController.position.maxScrollExtent,
+                        //       duration: const Duration(milliseconds: 1),
+                        //       curve: Curves.fastOutSlowIn);
+                        // });
+                        envoiMessage();
+                        setState(() {
+                          file = null;
+                        });
+                      },
+                    ),
+                  )
+                ],
               ),
-              SizedBox(width: 15),
-              Container(
-                padding: const EdgeInsets.all(15.0),
-                decoration: BoxDecoration(
-                    color: Colors.blueGrey, shape: BoxShape.circle),
-                child: InkWell(
-                  child: Icon(
-                    Icons.send_rounded,
-                    color: Colors.white,
-                  ),
-                  onTap: () {
-                    envoiMessage();
-                  },
-                ),
-              )
             ],
           ),
         ));
