@@ -14,6 +14,30 @@ const getListesDocuments = ((req, res) => {
         .catch(error => res.status(500).json({msg: error}))
 })
 
+const getListesDocumentsPDF = ((req, res) => {
+    Documents.find({idUser: req.params.userID}).sort({nom_fichier: 1}).where({extension: 'pdf'})
+        .then(result => res.status(200).json({ result }))
+        .catch(error => res.status(500).json({msg: error}))
+})
+
+const getListesDocumentsImages = ((req, res) => {
+    Documents.find({idUser: req.params.userID}).sort({nom_fichier: 1}).where('extension').in(['heic', 'jpg', 'png', 'gif', 'jpeg'])
+        .then(result => res.status(200).json({ result }))
+        .catch(error => res.status(500).json({msg: error}))
+})
+
+const getListesDocumentsWord = ((req, res) => {
+    Documents.find({idUser: req.params.userID}).sort({nom_fichier: 1}).where('extension').in(['docx', 'doc', 'odt', 'pages'])
+        .then(result => res.status(200).json({ result }))
+        .catch(error => res.status(500).json({msg: error}))
+})
+
+const getListesDocumentsExcel = ((req, res) => {
+    Documents.find({idUser: req.params.userID}).sort({nom_fichier: 1}).where('extension').in(['csv', 'xlsx', 'xls', 'ods'])
+        .then(result => res.status(200).json({ result }))
+        .catch(error => res.status(500).json({msg: error}))
+})
+
 const getDocumentById = ((req, res) => {
     Documents.findById({_id: req.params.docID})
         .then(result => res.status(200).json({ result }))
@@ -25,7 +49,7 @@ const postDocuments = ((req, res) => {
     const base64fichierTemp = fichierTemp.toString('base64');
     Documents.create({
         nom_fichier: req.body.nom_fichier,
-        extension: req.body.extension,
+        extension: req.body.extension.toLowerCase(),
         data_document: Buffer(base64fichierTemp, 'base64'),
         idUser: req.body.idUser
     })
@@ -39,4 +63,10 @@ const deleteDocuments = ((req, res) => {
     .catch(error => res.status(500).json({msg: error}))
 })
 
-module.exports = { getDocumentsRecents, getListesDocuments, getDocumentById, postDocuments, deleteDocuments };
+const modifyDocuments = ((req, res) => {
+    Documents.findByIdAndUpdate(req.params.idDoc, req.body)
+    .then(result => res.status(200).json({ message: `Le document ${result["nom_fichier"]} a été modifié.` }))
+    .catch(error => res.status(500).json({msg: error}))
+})
+
+module.exports = { getDocumentsRecents, getListesDocuments, getListesDocumentsPDF, getListesDocumentsImages, getListesDocumentsWord, getListesDocumentsExcel, getDocumentById, postDocuments, deleteDocuments, modifyDocuments };
