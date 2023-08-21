@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../Ressources/couleurs.dart';
+
 class NavHomeBottom extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
   final double height;
@@ -33,7 +35,7 @@ class NavHomeBottom extends StatelessWidget implements PreferredSizeWidget {
         ),
       ],
       currentIndex: selectedIndex,
-      selectedItemColor: Colors.blueGrey,
+      selectedItemColor: CouleursPrefs.couleurPrinc,
       unselectedItemColor: Colors.black,
       onTap: changeSelect(),
     );
