@@ -18,10 +18,10 @@
     "http-status-codes": "^2.2.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
+    "moment": "^2.29.4",
     "mongodb": "5.6",
     "mongoose": "^7.1.0",
     "nodemon": "^2.0.22",
-    "path": "^0.12.7",
-    "shortid": "^2.2.16"
+    "path": "^0.12.7"
   }
 }
