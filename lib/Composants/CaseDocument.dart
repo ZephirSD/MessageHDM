@@ -1,20 +1,26 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:messagehdm/Pages/DocumentPage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mime/mime.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'package:session_next/session_next.dart';
 
 import 'IconDocument.dart';
 
 class CaseDocuments extends StatefulWidget {
   final String title;
+  final String idDocument;
   final String extension;
   final String idEvent;
   final List<int> binaryImage;
-  CaseDocuments(this.title, this.extension, this.idEvent, this.binaryImage);
+  CaseDocuments(this.title, this.idDocument, this.extension, this.idEvent,
+      this.binaryImage);
 
   @override
   State<CaseDocuments> createState() => _CaseDocumentsState();
@@ -23,6 +29,7 @@ class CaseDocuments extends StatefulWidget {
 class _CaseDocumentsState extends State<CaseDocuments> {
   Widget build(BuildContext context) {
     var mimeType = null;
+    TextEditingController _modifTitre = TextEditingController();
     Future<String> createFile() async {
       final tempDir = await getTemporaryDirectory();
       File file =
@@ -30,6 +37,88 @@ class _CaseDocumentsState extends State<CaseDocuments> {
               .create();
       mimeType = lookupMimeType(file.path);
       return mimeType.toString();
+    }
+
+    Offset _tapPosition = Offset.zero;
+    void _getTapPosition(TapDownDetails details) {
+      final RenderBox renderBox = context.findRenderObject() as RenderBox;
+      setState(() {
+        _tapPosition = renderBox.globalToLocal(details.globalPosition);
+        print(_tapPosition);
+      });
+    }
+
+    bool _transformText = false;
+    final String _rpcUrl =
+        Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
+    var session = SessionNext();
+    void _showMenuPop(context) async {
+      final RenderObject? overlay =
+          Overlay.of(context).context.findRenderObject();
+      final result = await showMenu(
+        context: context,
+        position: RelativeRect.fromRect(
+          Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 10, 10),
+          Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy,
+              overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+        ),
+        items: [
+          const PopupMenuItem(
+            child: Text('Modifier le titre'),
+            value: 'modifier',
+          ),
+          const PopupMenuItem(
+            child: Text('Supprimer le document'),
+            value: 'supprimer',
+          ),
+        ],
+      );
+      switch (result) {
+        case 'modifier':
+          print('modifier le titre');
+          setState(() {
+            _transformText = true;
+          });
+          break;
+        case 'supprimer':
+          print('supprimer le document');
+          var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
+          var request = http.Request('DELETE',
+              Uri.parse('$_rpcUrl/api/documents/suppDoc/${widget.idDocument}'));
+
+          request.headers.addAll(headers);
+
+          http.StreamedResponse response = await request.send();
+
+          if (response.statusCode == 200) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Le document ${widget.title} a été supprimé'),
+              ),
+            );
+            // final tempDir = await getTemporaryDirectory();
+            // String filePath = await File(
+            //         '${tempDir.path}/${widget.title}.${widget.extension}')
+            //     .path;
+            // Directory dir = Directory.fromUri(filePath as Uri);
+            // dir.deleteSync(recursive: true);
+            // dir.create();
+            Timer(Duration(seconds: 2), () {
+              Navigator.pushReplacement(
+                context as BuildContext,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) =>
+                      DocumentHome(),
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
+              );
+            });
+          } else {
+            print(response.reasonPhrase);
+          }
+          break;
+      }
     }
 
     return Padding(
@@ -43,6 +132,13 @@ class _CaseDocumentsState extends State<CaseDocuments> {
           print(mimeType.toString());
           file.writeAsBytesSync(widget.binaryImage);
           OpenAppFile.open(file.path);
+        },
+        onTapDown: (details) {
+          _getTapPosition(details);
+        },
+        onLongPress: () {
+          print('ok LongPress ${widget.title}');
+          _showMenuPop(context);
         },
         child: SizedBox(
           width: 150,
@@ -121,7 +217,7 @@ class _CaseDocumentsState extends State<CaseDocuments> {
                                                                       ? IconDocument(
                                                                           FontAwesomeIcons
                                                                               .filePowerpoint)
-                                                                      // Treitement de texte
+                                                                      // Traitement de texte
                                                                       : snapshot
                                                                               .data!
                                                                               .endsWith("opendocument.text")
@@ -133,15 +229,25 @@ class _CaseDocumentsState extends State<CaseDocuments> {
                           return const Text('Aucune donnée');
                         }
                       } else {
-                        return Text('State: ${snapshot.connectionState}');
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Color.fromARGB(255, 14, 56, 129),
+                            color: Color.fromARGB(255, 82, 111, 255),
+                          ),
+                        );
                       }
                     },
                   ),
-                  Text(
-                    widget.title,
-                    style: TextStyle(color: Colors.white, fontSize: 15),
-                    textAlign: TextAlign.center,
-                  ),
+                  !_transformText
+                      ? Text(
+                          widget.title,
+                          style: TextStyle(color: Colors.white, fontSize: 15),
+                          textAlign: TextAlign.center,
+                        )
+                      : TextFormField(
+                          initialValue: widget.title,
+                          controller: _modifTitre,
+                        )
                 ],
               ),
             ),
