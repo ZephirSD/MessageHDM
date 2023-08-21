@@ -1,23 +1,31 @@
+List<int> transformListBin(var value) {
+  List<dynamic> bufferDynamic = value;
+  List<int> bufferInt = bufferDynamic.map((e) => e as int).toList();
+  return bufferInt;
+}
+
 class Messages {
   final String auteur;
-  final String texte;
+  final String? texte;
   final String evenement;
-  final String status;
+  final List<int>? document;
   final String dateEnvoi;
 
   Messages({
     required this.auteur,
     required this.texte,
     required this.evenement,
-    required this.status,
+    required this.document,
     required this.dateEnvoi,
   });
   factory Messages.fromJson(Map<String, dynamic> json) {
     return Messages(
       auteur: json["auteur"],
-      texte: json["texte"],
+      texte: json["texte"] ?? "",
       evenement: json["evenement"],
-      status: json["status"],
+      document: json["document"].isUndefined
+          ? transformListBin(json["document"]['data'])
+          : null,
       dateEnvoi: json["date_envoi"],
     );
   }
