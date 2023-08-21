@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Composants/ChangePage.dart';
-// import 'package:messagehdm/Composants/NavHomeBottom.dart';
+import 'package:messagehdm/Composants/Fonctions/FunctDeconnexion.dart';
+import 'package:messagehdm/Pages/ComptePage.dart';
 import 'package:messagehdm/Pages/DocumentPage.dart';
 import 'package:messagehdm/Pages/EvenementAccueil.dart';
+import 'package:messagehdm/Pages/NotificationsPages.dart';
 import 'package:session_next/session_next.dart';
 
-import '../main.dart';
+import '../Ressources/couleurs.dart';
 
 class SwitchPage extends StatefulWidget {
   SwitchPage({super.key});
@@ -18,18 +20,6 @@ class _SwitchPageState extends State<SwitchPage> {
   int _selectedIndex = 0;
   var session = SessionNext();
 
-  logoutFunction() {
-    session.removeAll();
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation1, animation2) => MyApp(),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,6 +29,8 @@ class _SwitchPageState extends State<SwitchPage> {
           children: <Widget>[
             ChangePage(EventPageAccueil(), 0, _selectedIndex),
             ChangePage(DocumentPage(), 1, _selectedIndex),
+            ChangePage(NotificationPages(), 2, _selectedIndex),
+            ChangePage(ComptePage(), 3, _selectedIndex),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -52,8 +44,8 @@ class _SwitchPageState extends State<SwitchPage> {
                 label: 'Documents',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.settings_applications),
-                label: 'Paramêtres',
+                icon: Icon(Icons.notifications_rounded),
+                label: 'Notifications',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle),
@@ -61,7 +53,7 @@ class _SwitchPageState extends State<SwitchPage> {
               ),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Colors.blueGrey,
+            selectedItemColor: CouleursPrefs.couleurPrinc,
             unselectedItemColor: Colors.black,
             onTap: (value) {
               setState(() {
@@ -69,15 +61,16 @@ class _SwitchPageState extends State<SwitchPage> {
               });
             }),
         appBar: AppBar(
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: CouleursPrefs.couleurPrinc,
           shadowColor: Colors.transparent,
           actions: [
             ElevatedButton(
               onPressed: () {
-                logoutFunction();
+                functDeconnexion(context);
               },
               child: Icon(Icons.logout),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red[300]),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: CouleursPrefs.couleurRose),
             )
           ],
         ),
