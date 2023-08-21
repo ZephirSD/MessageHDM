@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Pages/SwitchPage.dart';
+import '../Composants/AuthProvider.dart';
 import '../Composants/InputForm.dart';
 import 'package:session_next/session_next.dart';
-
+import 'package:provider/provider.dart';
+import '../Ressources/couleurs.dart';
 import '../main.dart';
 
 class ConnexionPage extends StatelessWidget {
@@ -16,8 +18,7 @@ class ConnexionPage extends StatelessWidget {
     return MaterialApp(
       home: ConnexionContainer(),
       debugShowCheckedModeBanner: false,
-      color: Colors.blueGrey,
-      // color: Colors.blueGrey,
+      color: CouleursPrefs.couleurPrinc,
     );
   }
 }
@@ -30,6 +31,18 @@ class ConnexionContainer extends StatefulWidget {
 }
 
 class _ConnexionContainerState extends State<ConnexionContainer> {
+  void initState() {
+    super.initState();
+    _email.text = 'siegfrieddallery@gmail.com';
+    _passwordUser.text = 'test';
+  }
+
+  void dispose() {
+    _email.dispose();
+    _passwordUser.dispose();
+    super.dispose();
+  }
+
   var session = SessionNext();
   final _formConnex = GlobalKey<FormState>();
   final _email = TextEditingController();
@@ -60,16 +73,13 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
           'pseudoUser': message["user"]["pseudo"],
           'idUser': message["user"]["_id"],
           'email': message["user"]["email"],
+          'phoneUser': message["user"]["telephone"]
         });
         print(session.get("idUser"));
         print(session.get("tokenUser"));
         print(session.get("pseudoUser"));
         print(session.get("email"));
         clearControllers();
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => SwitchPage()),
-        // );
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
@@ -93,7 +103,7 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: CouleursPrefs.couleurPrinc,
         shadowColor: Colors.transparent,
         leading: ElevatedButton(
           onPressed: () => {
@@ -110,7 +120,7 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
         ),
       ),
       body: Container(
-        color: Colors.blueGrey,
+        color: CouleursPrefs.couleurPrinc,
         width: double.infinity,
         height: double.infinity,
         child: Column(
@@ -125,17 +135,20 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 25, vertical: 10),
-                    child:
-                        InputForm("Email", Icon(Icons.email_rounded), _email),
+                    child: InputForm(
+                      "Email",
+                      _email,
+                      iconInput: Icon(Icons.email_rounded),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 25, vertical: 10),
                     child: InputForm(
                       "Mot de passe",
-                      Icon(Icons.password_rounded),
                       _passwordUser,
                       hiddenPassword: true,
+                      iconInput: Icon(Icons.password_rounded),
                     ),
                   ),
                   Padding(
@@ -144,6 +157,8 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
                     child: ElevatedButton(
                       onPressed: () {
                         connect();
+                        Provider.of<AuthProvider>(context, listen: false)
+                            .checkLoginStatus();
                       },
                       style: ButtonStyle(
                         backgroundColor:
