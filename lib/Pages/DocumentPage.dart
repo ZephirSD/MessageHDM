@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:messagehdm/Composants/CaseDocument.dart';
-import 'package:messagehdm/Composants/Documents/documents_class.dart';
 import 'package:session_next/session_next.dart';
+import '../Composants/Fonctions/FunctFetchDataDocument.dart';
+import '../Composants/FutureFetchDoc.dart';
+import '../Ressources/couleurs.dart';
 import 'package:http/http.dart' as http;
 
 final String _rpcUrl =
@@ -27,187 +28,146 @@ class DocumentHome extends StatefulWidget {
 }
 
 class _DocumentHomeState extends State<DocumentHome> {
-  List<Documents> listDocuments = [];
-  Future<List<Documents>> fetchDocuments() async {
-    var url =
-        Uri.parse('${_rpcUrl}/api/documents/recents/${session.get("idUser")}');
-    var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
-    var request = http.Request('GET', url);
+  envoiDocuments() async {
+    var headers = {
+      'Content-Type': 'application/json',
+      'Authorization':
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NDc4NzQxMDNhMzg4YWNiNDIzMzEyZmYiLCJwc2V1ZG8iOiJ0ZXN0IiwiaWF0IjoxNjg3NzcxOTYxLCJleHAiOjE2OTAzNjM5NjF9.WIG_RbC4KOH7CP2JrDvvVZMFomyXQcrKd8N3jyGhZHo'
+    };
+    var request =
+        http.Request('POST', Uri.parse('https://localhost:8000/api/documents'));
+    request.body = json.encode({
+      "nom_fichier": "Calendrier CDA 2023",
+      "extension": "pdf",
+      "idUser": "6478377caed27755fa0cf850",
+      "lien_fichier":
+          "/Users/siegfrieddallery/Library/Mobile Documents/com~apple~CloudDocs/OSIPRO Concepteur d’application mobile/Calendrier CDA 3.pdf"
+    });
     request.headers.addAll(headers);
-    listDocuments.clear();
+
     http.StreamedResponse response = await request.send();
-    var streamReponse = await http.Response.fromStream(response);
 
     if (response.statusCode == 200) {
-      // print(await response.stream.bytesToString());
-      return Documents.fromJsonList(json.decode(streamReponse.body));
+      print(await response.stream.bytesToString());
     } else {
       print(response.reasonPhrase);
-      throw Exception('Request Failed.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey,
-      body: SafeArea(
-          child: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const Align(
-              alignment: AlignmentDirectional(-0.65, 0),
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
-                child: Text(
-                  'Documents',
-                  textAlign: TextAlign.start,
-                  style: TextStyle(
-                    fontFamily: 'Lexend Deca',
-                    color: Colors.white,
-                    fontSize: 22,
+      backgroundColor: CouleursPrefs.couleurPrinc,
+      body: SingleChildScrollView(
+        child: SafeArea(
+            child: Container(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              const Align(
+                alignment: AlignmentDirectional(-0.65, 0),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
+                  child: Text(
+                    'Documents',
+                    textAlign: TextAlign.start,
+                    style: TextStyle(
+                      fontFamily: 'Lexend Deca',
+                      color: Colors.white,
+                      fontSize: 22,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 20, 10, 0),
-              child: TextFormField(
-                //controller: _model.textController,
-                autofocus: true,
-                obscureText: false,
-                decoration: InputDecoration(
-                  hintText: 'Document à rechercher',
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Lexend Deca',
-                    fontSize: 14,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0x00000000),
-                      width: 1,
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 20, 10, 0),
+                child: TextFormField(
+                  //controller: _model.textController,
+                  autofocus: true,
+                  obscureText: false,
+                  decoration: InputDecoration(
+                    hintText: 'Document à rechercher',
+                    hintStyle: const TextStyle(
+                      fontFamily: 'Lexend Deca',
+                      fontSize: 14,
                     ),
-                    borderRadius: BorderRadius.circular(35),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0x00000000),
-                      width: 1,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0x00000000),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(35),
                     ),
-                    borderRadius: BorderRadius.circular(35),
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0x00000000),
-                      width: 1,
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0x00000000),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(35),
                     ),
-                    borderRadius: BorderRadius.circular(35),
-                  ),
-                  focusedErrorBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(
-                      color: Color(0x00000000),
-                      width: 1,
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0x00000000),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(35),
                     ),
-                    borderRadius: BorderRadius.circular(35),
-                  ),
-                  filled: true,
-                  suffixIcon: const Icon(
-                    Icons.search,
-                    color: Colors.white,
-                    size: 17,
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(
+                        color: Color(0x00000000),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(35),
+                    ),
+                    filled: true,
+                    suffixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.white,
+                      size: 17,
+                    ),
                   ),
                 ),
-                //style: FlutterFlowTheme.of(context).bodyMedium,
-                // validator: _model.textControllerValidator.asValidator(context),
               ),
-            ),
-            Column(
-              children: [
-                const Align(
-                  alignment: AlignmentDirectional(-0.65, 0),
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
-                    child: Text(
-                      'Documents récents',
-                      style: TextStyle(
-                        fontFamily: 'Lexend Deca',
-                        color: Colors.white,
-                        fontSize: 18,
+              ElevatedButton(
+                  onPressed: () {}, child: Text('Ajouter un document')),
+              Column(
+                children: [
+                  FutureFetchDoc(
+                    "Documents récents",
+                    functFetch: fetchDocuments(_rpcUrl, session),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  const Align(
+                    alignment: AlignmentDirectional(-0.65, 0),
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
+                      child: Text(
+                        'Listes des documents',
+                        style: TextStyle(
+                          fontFamily: 'Lexend Deca',
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Container(
-                    height: 200,
-                    child: FutureBuilder(
-                      future: fetchDocuments(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<Documents>> snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.data == null) {
-                            return const Center(
-                              child: Text('Aucune donnée reçu'),
-                            );
-                          }
-                          return ListView.builder(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.symmetric(horizontal: 25),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: snapshot.data?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                return CaseDocuments(
-                                    snapshot.data![index].nomFichier,
-                                    snapshot.data![index].extensionFichier,
-                                    snapshot.data![index].idDoc,
-                                    snapshot.data![index].dataDocument);
-                              });
-                        }
-                        return Center(
-                          child: const CircularProgressIndicator(),
-                        );
-                      },
-                    ),
-                  ),
-                )
-              ],
-            ),
-            Column(
-              children: [
-                const Align(
-                  alignment: AlignmentDirectional(-0.65, 0),
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 25, 0, 0),
-                    child: Text(
-                      'Liste des documents',
-                      style: TextStyle(
-                        fontFamily: 'Lexend Deca',
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Container(
-                    height: 200,
-                    color: Colors.deepPurple,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: [],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      )),
+                  FutureFetchDoc("PDF",
+                      functFetch: fetchDocumentsPDF(_rpcUrl, session)),
+                  FutureFetchDoc("Images",
+                      functFetch: fetchDocumentsImages(_rpcUrl, session)),
+                  FutureFetchDoc("Word",
+                      functFetch: fetchDocumentsWord(_rpcUrl, session)),
+                  FutureFetchDoc("Excel",
+                      functFetch: fetchDocumentsExcel(_rpcUrl, session)),
+                ],
+              ),
+            ],
+          ),
+        )),
+      ),
     );
   }
 }
