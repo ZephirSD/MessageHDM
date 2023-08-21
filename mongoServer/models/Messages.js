@@ -6,14 +6,11 @@ const messageSchema = new mongoose.Schema({
   evenement: {
     type: String,
   },
-  status: {
-    type: String,
-  },
   texte: {
     type: String,
   },
   document: {
-    type: String,
+    type: Buffer,
   },
   date_envoi: {
     type: Date,
