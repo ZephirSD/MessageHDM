@@ -56,16 +56,14 @@ class _InputDateDebutState extends State<InputDateDebut> {
           );
           setState(() {
             widget._selectedDate = dateRecupDeb;
+            if (widget._selectedDate != null) {
+              String formattedDate =
+                  DateFormat('dd/MM/yyyy').format(widget._selectedDate!);
+              setState(() {
+                widget._dateDebut.text = formattedDate;
+              });
+            }
           });
-          // if (widget._selectedDate != null) {
-          //   // print(_selectedDate.toString());
-          //   String formattedDate =
-          //       DateFormat('dd/MM/yyyy').format(widget._selectedDate!);
-          //   // print(formattedDate);
-          //   setState(() {
-          //     widget._dateFin.text = formattedDate;
-          //   });
-          // }
         },
       ),
     );
