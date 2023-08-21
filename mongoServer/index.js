@@ -10,12 +10,15 @@ const authRouter = require("./routes/auth");
 const messagesRouter = require("./routes/messageRoutes");
 const eventsRouter = require("./routes/evenementsRoutes");
 const documentRouter = require("./routes/documentsRoutes");
+const notificationRouter = require("./routes/notificationsRoutes");
+
 app.use(cors());
 app.use(express.json());
 app.use("/api", authRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/evenements", eventsRouter);
 app.use("/api/documents", documentRouter);
+app.use("/api/notifications", notificationRouter);
 const key = fs.readFileSync(path.join(__dirname, 'certificate', 'server.key'));
 const cert = fs.readFileSync(path.join(__dirname, 'certificate', 'server.cert'));
 const options = { key, cert };
