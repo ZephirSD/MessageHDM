@@ -1,12 +1,15 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class BulleMessage extends StatelessWidget {
-  final String message;
+  final String? message;
   final DateTime date;
   final String auteur;
   final String auteurSession;
-  BulleMessage(this.message, this.date, this.auteur, this.auteurSession);
+  final List<int>? binaryImage;
+  BulleMessage(this.message, this.date, this.auteur, this.auteurSession,
+      {this.binaryImage});
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +35,20 @@ class BulleMessage extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 15, vertical: 10),
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                          color: auteur == auteurSession
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16),
-                    ),
+                    child: binaryImage == null
+                        ? Text(
+                            message!,
+                            style: TextStyle(
+                                color: auteur == auteurSession
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 16),
+                          )
+                        : Image.memory(
+                            Uint8List.fromList(binaryImage!),
+                            // height: 130,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
               ),
