@@ -6,17 +6,23 @@ const eventSchema = new mongoose.Schema({
   },
   date_debut: {
      type: Date,
-     require: true,
   },
   date_fin: {
      type: Date,
-     require: true,
   },
   mode_event: {
      type: String,
   },
   create_event: {
     type: String,
-  }
+  },
+  invite_prive: [{
+   pseudo: {
+      type: String,
+   },
+   accept: {
+      type: Boolean,
+   }
+  }]
 },{ timestamps: true });
 module.exports = mongoose.model("Evenements", eventSchema);
