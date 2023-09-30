@@ -8,7 +8,7 @@ const signUp = async (req, res) => {
    // Initialisation des différents variables de la requête
   const { pseudo, email, passwordUser, telephone } = req.body;
    // Affiche un erreur lors les inforamtions ne sont pas definis
-  if (!pseudo || !email || !passwordUser) {
+  if (!pseudo && !email && !passwordUser) {
      return res.status(StatusCodes.BAD_REQUEST).json({
         message: "Information impossible",
      });
