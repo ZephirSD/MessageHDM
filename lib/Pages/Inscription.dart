@@ -45,10 +45,6 @@ class _InscriptionContainerState extends State<InscriptionContainer> {
   }
 
   inscri() async {
-    // print(_pseudo.text);
-    // print(_email.text);
-    // print(_passwordUser.text);
-    // print(_telephone.text);
     var url = Uri.parse('${_rpcUrl}/api/inscrip');
     if (_passwordUser.text == _passwordValid.text) {
       var body = {
@@ -102,6 +98,10 @@ class _InscriptionContainerState extends State<InscriptionContainer> {
         backgroundColor: CouleursPrefs.couleurPrinc,
         shadowColor: Colors.transparent,
         leading: ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor:
+                MaterialStatePropertyAll(CouleursPrefs.couleurGrisClair),
+          ),
           onPressed: () => {
             Navigator.pushReplacement(
               context,
@@ -112,7 +112,10 @@ class _InscriptionContainerState extends State<InscriptionContainer> {
               ),
             ),
           },
-          child: Icon(Icons.arrow_back),
+          child: Icon(
+            Icons.arrow_back,
+            color: CouleursPrefs.couleurNoir,
+          ),
         ),
       ),
       body: Container(
@@ -180,7 +183,7 @@ class _InscriptionContainerState extends State<InscriptionContainer> {
                     },
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStatePropertyAll(Colors.deepPurple),
+                          MaterialStatePropertyAll(CouleursPrefs.couleurRose),
                       shadowColor: MaterialStatePropertyAll(Colors.transparent),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(

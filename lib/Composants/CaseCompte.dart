@@ -20,7 +20,7 @@ class CaseCompte extends StatelessWidget {
               width: MediaQuery.sizeOf(context).width,
               height: 60,
               decoration: BoxDecoration(
-                color: CouleursPrefs.bleuCaseBleu,
+                color: CouleursPrefs.couleurGrisFonce,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black,

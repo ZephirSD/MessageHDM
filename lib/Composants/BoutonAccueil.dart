@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:messagehdm/Ressources/couleurs.dart';
 
 class BoutonAccueil extends StatelessWidget {
   Widget page;
@@ -19,7 +20,7 @@ class BoutonAccueil extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 65),
         margin: const EdgeInsets.symmetric(vertical: 20),
-        color: Colors.blueGrey[600],
+        color: CouleursPrefs.couleurGrisFonce,
         child: Text(
           titreBouton,
           style: const TextStyle(color: Colors.white, fontSize: 18),

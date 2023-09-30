@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:messagehdm/Ressources/couleurs.dart';
 import 'CaseDocument.dart';
 import 'Documents/documents_class.dart';
 
@@ -47,12 +48,12 @@ class _FutureFetchDocState extends State<FutureFetchDoc> {
                         if (snapshot.data == null ||
                             snapshot.data?.length == 0) {
                           return Container(
-                            color: Color.fromARGB(107, 52, 52, 188),
+                            color: CouleursPrefs.couleurGrisClair,
                             child: const Center(
                               child: Text(
                                 'Aucun document',
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 15),
+                                    color: Colors.black, fontSize: 15),
                               ),
                             ),
                           );

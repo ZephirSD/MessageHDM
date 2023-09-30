@@ -106,6 +106,9 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
         backgroundColor: CouleursPrefs.couleurPrinc,
         shadowColor: Colors.transparent,
         leading: ElevatedButton(
+          style: ButtonStyle(
+              backgroundColor:
+                  MaterialStatePropertyAll(CouleursPrefs.couleurGrisClair)),
           onPressed: () => {
             Navigator.pushReplacement(
               context,
@@ -116,7 +119,7 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
               ),
             ),
           },
-          child: Icon(Icons.arrow_back),
+          child: Icon(Icons.arrow_back, color: CouleursPrefs.couleurNoir),
         ),
       ),
       body: Container(
@@ -162,7 +165,7 @@ class _ConnexionContainerState extends State<ConnexionContainer> {
                       },
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStatePropertyAll(Colors.deepPurple),
+                            MaterialStatePropertyAll(CouleursPrefs.couleurRose),
                         shadowColor:
                             MaterialStatePropertyAll(Colors.transparent),
                         shape:
