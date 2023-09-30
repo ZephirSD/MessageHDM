@@ -29,13 +29,26 @@ const eventsCreate = ((req, res) => {
     .catch(error => res.status(500).json({msg: error}))
 })
 
+const modifEvent = ((req, res) => {
+    Evenements.findByIdAndUpdate(req.params.eventID, req.body)
+    .then(result => res.status(200).json({ message: `Vous avez modifié l'évènement ${result["nom_event"]}` }))
+    .catch(error => res.status(500).json({msg: error}))
+})
+
 const deleteEvents = ((req, res) => {
     Evenements.findByIdAndDelete({_id: req.params.eventID})
     .then(
-        result => res.status(200).json({ result }),
-        Messages.findByIdAndDelete({evenement: req.params.eventID})
-        .then(result => res.status(200).json({ result }))
-        .catch(error => res.status(500).json({msg: error}))
+        result => {
+            if(result){
+                try{
+                    Messages.deleteMany({evenement: result["_id"]})
+                    res.status(200).json({ message: "Vous avez supprimé l'évènement et les messages associés" })
+                }
+                catch(error){
+                    res.status(500).json({ message: error })
+                }
+            }
+        }
     )
     .catch(error => res.status(500).json({msg: error}))
 });
@@ -86,11 +99,10 @@ const eventInvitePrive = ((req, res) => {
                     ]}
                 ]}
             ]
-            
         },
     }])
     .then(result => res.status(200).json({ result }))
     .catch(error => res.status(500).json({msg: error}))
 });
 
-module.exports = { getEvents, getOneEvent, eventsCreate, deleteEvents, modifAccepInvite, eventInvitePrive, refusAccepInvite };
+module.exports = { getEvents, getOneEvent, eventsCreate, deleteEvents, modifAccepInvite, eventInvitePrive, refusAccepInvite, modifEvent };
