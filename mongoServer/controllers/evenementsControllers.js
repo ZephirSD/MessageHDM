@@ -1,3 +1,4 @@
+const { StatusCodes } = require('http-status-codes');
 const Evenements = require('../models/Evenements');
 const Messages = require('../models/Messages');
 const moment = require('moment');
@@ -105,4 +106,28 @@ const eventInvitePrive = ((req, res) => {
     .catch(error => res.status(500).json({msg: error}))
 });
 
-module.exports = { getEvents, getOneEvent, eventsCreate, deleteEvents, modifAccepInvite, eventInvitePrive, refusAccepInvite, modifEvent };
+const arrayPseudoEventPrive = ((req, res) => {
+    try{
+        Evenements.find({_id: req.params.eventID})
+        .then(result => {
+            if (result) {
+                const arrayPseudo = result.reduce((acc, event) => {
+                    event.invite_prive.forEach((invite) =>{
+                        if(invite.accept){
+                            acc.push({id: invite._id, display: invite.pseudo});
+                        }
+                    })
+                    return acc;
+                }, []);
+                res.status(StatusCodes.OK).json({ result: arrayPseudo });
+            }
+          })
+          .catch(error => {
+            res.status(StatusCodes.BAD_REQUEST).json({msg: error});
+          });        }
+    catch(error) {
+        res.status(StatusCodes.BAD_REQUEST).json({error: error})
+    }
+});
+
+module.exports = { getEvents, getOneEvent, eventsCreate, deleteEvents, modifAccepInvite, eventInvitePrive, refusAccepInvite, modifEvent, arrayPseudoEventPrive };
