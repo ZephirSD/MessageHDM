@@ -25,3 +25,21 @@ Future<List<Evenements>> fetchFindEvent(String idEvent) async {
     throw Exception('Request Failed.');
   }
 }
+
+Future<List<dynamic>> fetchGetPseudo(String? idEvent) async {
+  var url = Uri.parse('$_rpcUrl/api/evenements/find-pseudo/$idEvent');
+  var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
+  var request = http.Request('GET', url);
+
+  request.headers.addAll(headers);
+
+  http.StreamedResponse response = await request.send();
+  var streamReponse = await http.Response.fromStream(response);
+
+  if (response.statusCode == 200) {
+    var jsonRecup = json.decode(streamReponse.body);
+    return jsonRecup['result'];
+  } else {
+    throw Exception('Request Failed.');
+  }
+}
