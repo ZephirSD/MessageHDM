@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Composants/Evenements/evenements_class.dart';
 import '../Composants/CaseEvent.dart';
+import '../Ressources/couleurs.dart';
 import 'NewEvenement.dart';
 import 'package:http/http.dart' as http;
 import 'package:session_next/session_next.dart';
@@ -27,12 +28,18 @@ class EventContainerAccueil extends StatefulWidget {
 
 class _EventContainerAccueilState extends State<EventContainerAccueil> {
   var session = SessionNext();
-  var url = Uri.parse('${_rpcUrl}/api/evenements/');
+  var url = Uri.parse('${_rpcUrl}/api/evenements/event-invite');
 
   Future<List<Evenements>> fetchEvenement() async {
-    var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
-    var request = http.Request('GET', url);
-
+    var headers = {
+      'Authorization': 'Bearer ${session.get('tokenUser')}',
+      'Content-Type': 'application/json'
+    };
+    var request = http.Request('POST', url);
+    request.body = json.encode({
+      "createEvent": session.get('email'),
+      "pseudoEvent": session.get('pseudoUser')
+    });
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
@@ -45,10 +52,17 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
     }
   }
 
+  Stream<List<Evenements>> getEvenements(Duration refreshTime) async* {
+    while (true) {
+      await Future.delayed(refreshTime);
+      yield await fetchEvenement();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blueGrey,
+        backgroundColor: CouleursPrefs.couleurPrinc,
         body: Column(
           children: [
             Padding(
@@ -96,25 +110,36 @@ class _EventContainerAccueilState extends State<EventContainerAccueil> {
                 ],
               ),
             ),
-            Expanded(
-              child: FutureBuilder(
-                future: fetchEvenement(),
-                builder: (context, AsyncSnapshot<List<Evenements>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.data == null) {
-                      return const Center(child: Text('Something went wrong'));
-                    }
-
+            Flexible(
+              child: StreamBuilder(
+                stream: getEvenements(Duration(seconds: 1)),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData || snapshot.data != null) {
+                    final events = snapshot.data!;
                     return ListView.builder(
-                        itemCount: snapshot.data?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          return CaseEvent(snapshot.data![index].nomEvent,
-                              snapshot.data![index].idEvent);
-                        });
+                      reverse: false,
+                      itemCount: events.length,
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+                        return CaseEvent(
+                          event.nomEvent,
+                          event.idEvent,
+                          event.modeEvent,
+                          admimEvent: event.createEvent,
+                        );
+                      },
+                    );
+                  } else {
+                    return SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: CouleursPrefs.couleurPrinc,
+                        ),
+                      ),
+                    );
                   }
-                  return Center(
-                    child: const CircularProgressIndicator(),
-                  );
                 },
               ),
             )
