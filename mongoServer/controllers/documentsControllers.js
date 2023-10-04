@@ -1,4 +1,5 @@
 const Documents = require('../models/Documents');
+const { StatusCodes } = require("http-status-codes");
 const fs = require('fs');
 const path = require('path');
 
@@ -46,15 +47,18 @@ const getDocumentById = ((req, res) => {
 
 const postDocuments = ((req, res) => {
     const fichierTemp = fs.readFileSync(path.resolve(req.body.lien_fichier));
-    const base64fichierTemp = fichierTemp.toString('base64');
     Documents.create({
         nom_fichier: req.body.nom_fichier,
-        extension: req.body.extension.toLowerCase(),
-        data_document: Buffer(base64fichierTemp, 'base64'),
+        extension: req.body.extension,
+        data_document: Buffer.from(fichierTemp.buffer, 'base64'),
         idUser: req.body.idUser
     })
-    .then(result => res.status(200).json({ result }))
-    .catch(error => res.status(500).json({msg: error}))
+    .then(result => res.status(StatusCodes.CREATED).json({ 
+        result: `Le document ${result["nom_fichier"]} est crée`
+    }))
+    .catch(error => res.status(StatusCodes.BAD_REQUEST).json({
+        msg: error
+    }))
 })
 
 const deleteDocuments = ((req, res) => {
