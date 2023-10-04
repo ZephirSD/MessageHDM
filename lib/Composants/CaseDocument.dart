@@ -4,13 +4,13 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Pages/DocumentPage.dart';
+import 'package:messagehdm/Ressources/couleurs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mime/mime.dart';
 import 'package:open_app_file/open_app_file.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:session_next/session_next.dart';
-
 import 'IconDocument.dart';
 
 class CaseDocuments extends StatefulWidget {
@@ -44,7 +44,7 @@ class _CaseDocumentsState extends State<CaseDocuments> {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
       setState(() {
         _tapPosition = renderBox.globalToLocal(details.globalPosition);
-        print(_tapPosition);
+        print('position: ${_tapPosition}');
       });
     }
 
@@ -59,8 +59,12 @@ class _CaseDocumentsState extends State<CaseDocuments> {
         context: context,
         position: RelativeRect.fromRect(
           Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 10, 10),
-          Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy,
-              overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+          Rect.fromLTWH(
+            0,
+            0,
+            overlay!.paintBounds.size.width,
+            overlay!.paintBounds.size.height,
+          ),
         ),
         items: [
           const PopupMenuItem(
@@ -91,18 +95,15 @@ class _CaseDocumentsState extends State<CaseDocuments> {
           http.StreamedResponse response = await request.send();
 
           if (response.statusCode == 200) {
+            Directory dir = await getTemporaryDirectory();
+            File fileCache =
+                File('${dir.path}/${widget.title}.${widget.extension}');
+            await fileCache.delete();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Le document ${widget.title} a été supprimé'),
               ),
             );
-            // final tempDir = await getTemporaryDirectory();
-            // String filePath = await File(
-            //         '${tempDir.path}/${widget.title}.${widget.extension}')
-            //     .path;
-            // Directory dir = Directory.fromUri(filePath as Uri);
-            // dir.deleteSync(recursive: true);
-            // dir.create();
             Timer(Duration(seconds: 2), () {
               Navigator.pushReplacement(
                 context as BuildContext,
@@ -145,7 +146,7 @@ class _CaseDocumentsState extends State<CaseDocuments> {
           height: 100,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: Color.fromARGB(107, 52, 52, 188),
+              color: CouleursPrefs.couleurGrisFonce,
               borderRadius: BorderRadius.circular(15),
             ),
             child: Padding(
@@ -238,15 +239,24 @@ class _CaseDocumentsState extends State<CaseDocuments> {
                       }
                     },
                   ),
-                  !_transformText
-                      ? Text(
+                  _transformText
+                      ? Column(
+                          children: [
+                            TextFormField(
+                              // initialValue: widget.title,
+                              controller: _modifTitre,
+                              decoration: InputDecoration(labelText: "Test"),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {},
+                              child: Text("Terminer"),
+                            ),
+                          ],
+                        )
+                      : Text(
                           widget.title,
                           style: TextStyle(color: Colors.white, fontSize: 15),
                           textAlign: TextAlign.center,
-                        )
-                      : TextFormField(
-                          initialValue: widget.title,
-                          controller: _modifTitre,
                         )
                 ],
               ),
