@@ -30,74 +30,129 @@ class _CompteContainerState extends State<CompteContainer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: CouleursPrefs.couleurPrinc,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: CouleursPrefs.couleurPrinc,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 45),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.account_circle,
-                      size: 80,
-                      color: Colors.white,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        '${session.get('pseudoUser')}',
-                        style: TextStyle(
+      backgroundColor: CouleursPrefs.couleurPrinc,
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Container(
+            // color: CouleursPrefs.couleurPrinc,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: CouleursPrefs.couleurPrinc,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 45),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.account_circle,
+                          size: 80,
                           color: Colors.white,
-                          fontSize: 24,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Text(
+                            '${session.get('pseudoUser')}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Padding(
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(24, 16, 0, 16),
+                            child: Text(
+                              'Paramètres du compte',
+                              style: TextStyle(
+                                fontSize: 22,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        child: Column(
+                          children: [
+                            CaseCompte(
+                              'Modifier le profil',
+                              redirection: const ModifProfilPage(),
+                            ),
+                            CaseCompte(
+                              'Changer le mot de passe',
+                              redirection: const ModifPasswordPage(),
+                            ),
+                            CaseCompte(
+                              "Supprimer votre compte",
+                              boolPage: false,
+                              boolPopUp: true,
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(24, 16, 0, 16),
-                  child: Text(
-                    'Paramètres du compte',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                    ),
+                    ],
                   ),
                 ),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Padding(
+                          padding:
+                              EdgeInsetsDirectional.fromSTEB(24, 16, 0, 16),
+                          child: Text(
+                            "Paramètres de l'application",
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      child: Column(
+                        children: [
+                          CaseCompte(
+                            'Mode sombre',
+                            boolPage: false,
+                            toggle: true,
+                          ),
+                          CaseCompte(
+                            "Purge des évènements",
+                            boolPage: false,
+                          ),
+                          CaseCompte(
+                            "Notification push",
+                            boolPage: false,
+                            toggle: true,
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                )
               ],
             ),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                scrollDirection: Axis.vertical,
-                children: [
-                  CaseCompte(
-                    'Modifier le profil',
-                    redirection: const ModifProfilPage(),
-                  ),
-                  CaseCompte(
-                    'Changer le mot de passe',
-                    redirection: const ModifPasswordPage(),
-                  ),
-                  CaseCompte("Supprimer votre compte"),
-                ],
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );
