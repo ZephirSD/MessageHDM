@@ -1,39 +1,55 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_mentions/flutter_mentions.dart';
+import 'package:get/utils.dart';
 // import 'package:flutter/scheduler.dart';
 import 'package:messagehdm/Composants/BulleMessage.dart';
+import 'package:messagehdm/Composants/Fonctions/FunctFetchEvenements.dart';
+import 'package:messagehdm/Composants/InputForm.dart';
 import 'package:messagehdm/Composants/Messages/messages_class.dart';
+import 'package:messagehdm/Ressources/routes.dart';
 import 'package:session_next/session_next.dart';
 import 'package:http/http.dart' as http;
+import '../Composants/Fonctions/FunctFetchUtilisateurs.dart';
+import '../Composants/InputMentionUser.dart';
 import '../Ressources/couleurs.dart';
 import 'EvenementAccueil.dart';
 import 'package:file_picker/file_picker.dart';
 // import 'package:open_app_file/open_app_file.dart';
 
 TextEditingController _messagesEnvoi = TextEditingController();
+TextEditingController _invites = TextEditingController();
 ScrollController _scrollController = ScrollController();
+TextEditingController _nomEvent = TextEditingController();
+
+List<String> _listMentions = [];
+String elementPseudo = "";
 
 class MessagePage extends StatelessWidget {
   final String titreEvent;
-  MessagePage(this.titreEvent);
+  final String idEvent;
+  final String modeEvent;
+  MessagePage(this.titreEvent, this.idEvent, this.modeEvent);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MessageHome(titreEvent),
+      home: MessageHome(titreEvent, idEvent, modeEvent),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-final String _rpcUrl =
-    Platform.isAndroid ? 'https://10.0.2.2:8000' : 'https://127.0.0.1:8000';
 var session = SessionNext();
 PlatformFile? file;
+var headers = {
+  'Content-Type': 'application/json',
+  'Authorization': 'Bearer ${session.get('tokenUser')}'
+};
 Future<List<Messages>> fetchMessages() async {
   var eventString = session.get('event');
-  var url = Uri.parse('$_rpcUrl/api/messages/$eventString');
+  var url = Uri.parse('${Routes.rLocalURL}/api/messages/$eventString');
   List<Messages> messages = [];
   messages.clear();
   var headers = {'Authorization': 'Bearer ${session.get('tokenUser')}'};
@@ -72,18 +88,26 @@ Future<List<Messages>> fetchMessages() async {
   }
 }
 
+functValueChange(String value) {
+  List<String> userList = value.trim().split('@').skip(1).toList();
+  _listMentions = userList;
+  print(_listMentions);
+}
+
+functArrayPseudo() async {
+  List<dynamic> data = await fetchGetPseudo(session.get("event"));
+  List pseudoList = data.map((item) => '@${item['display']}').toList();
+  String stringPseudo = pseudoList.join(' ');
+  elementPseudo = stringPseudo;
+}
+
 envoiMessage() async {
-  var headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ${session.get('tokenUser')}'
-  };
   if (_messagesEnvoi.text.isNotEmpty) {
     var requestMessage =
-        http.Request('POST', Uri.parse('$_rpcUrl/api/messages'));
+        http.Request('POST', Uri.parse('${Routes.rLocalURL}/api/messages'));
     requestMessage.body = json.encode({
       "auteur": session.get("pseudoUser"),
       "evenement": session.get("event"),
-      "status": "lu",
       "texte": _messagesEnvoi.text,
       "date_envoi": DateTime.now().toString()
     });
@@ -99,7 +123,7 @@ envoiMessage() async {
   } else if (file != null) {
     File fileDire = File(file!.path.toString());
     var requestMessage =
-        http.Request('POST', Uri.parse('$_rpcUrl/api/messages'));
+        http.Request('POST', Uri.parse('${Routes.rLocalURL}/api/messages'));
     requestMessage.body = json.encode({
       "auteur": session.get("pseudoUser"),
       "evenement": session.get("event"),
@@ -132,13 +156,22 @@ Stream<List<Messages>> getMessages(Duration refreshTime) async* {
 
 class MessageHome extends StatefulWidget {
   final String titreEvent;
-  MessageHome(this.titreEvent);
+  final String idEvent;
+  final String modeEvent;
+  MessageHome(this.titreEvent, this.idEvent, this.modeEvent);
 
   @override
   State<MessageHome> createState() => _MessageHomeState();
 }
 
 class _MessageHomeState extends State<MessageHome> {
+  void initState() {
+    // TODO: implement initState
+    _nomEvent.text = widget.titreEvent;
+    functArrayPseudo();
+    super.initState();
+  }
+
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
@@ -147,6 +180,31 @@ class _MessageHomeState extends State<MessageHome> {
       });
       // file == null ? false : OpenAppFile.open(file!.path.toString());
       print(file!.path.toString());
+    }
+  }
+
+  modifEvenement() async {
+    var request = http.Request(
+        'PUT',
+        Uri.parse(
+            '${Routes.rLocalURL}/api/evenements/modif-event/${session.get('event')}'));
+    request.body = json.encode({"nom_event": _nomEvent.text});
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation1, animation2) =>
+              MessagePage(_nomEvent.text, widget.idEvent, widget.modeEvent),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+    } else {
+      print(response.reasonPhrase);
     }
   }
 
@@ -160,6 +218,7 @@ class _MessageHomeState extends State<MessageHome> {
           leading: ElevatedButton(
             onPressed: () => {
               session.remove('event'),
+              session.remove('adminEvent'),
               file = null,
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -173,6 +232,226 @@ class _MessageHomeState extends State<MessageHome> {
             ),
             child: const Icon(Icons.arrow_back_ios),
           ),
+          actions: [
+            session.get('adminEvent') == session.get("email")
+                ? ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStatePropertyAll(
+                          CouleursPrefs.couleurGrisFonce),
+                    ),
+                    onPressed: () {
+                      showGeneralDialog(
+                        context: context,
+                        pageBuilder: (BuildContext buildContext,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation) {
+                          return Portal(
+                            child: MaterialApp(
+                              debugShowCheckedModeBanner: false,
+                              home: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 0, vertical: 0),
+                                  child: Scaffold(
+                                    appBar: AppBar(
+                                      leading: ElevatedButton(
+                                        onPressed: () => {
+                                          Navigator.of(buildContext).pop(),
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                        ),
+                                        child: const Icon(
+                                          Icons.arrow_back_ios,
+                                          color: CouleursPrefs.couleurBlanc,
+                                        ),
+                                      ),
+                                      backgroundColor:
+                                          CouleursPrefs.couleurPrinc,
+                                      shadowColor: Colors.transparent,
+                                      title: Text(
+                                        'Admin de ${widget.titreEvent}',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 22),
+                                      ),
+                                      centerTitle: true,
+                                    ),
+                                    body: Container(
+                                      decoration: BoxDecoration(
+                                        color: CouleursPrefs.couleurPrinc,
+                                      ),
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10),
+                                              child: InputForm(
+                                                  "Nom de l'évènement",
+                                                  _nomEvent)),
+                                          widget.modeEvent == "prive"
+                                              ? Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10),
+                                                  child: FutureBuilder(
+                                                    future: fetchGetPseudo(
+                                                        session.get('event')),
+                                                    builder: (context,
+                                                        AsyncSnapshot<
+                                                                List<dynamic>>
+                                                            snapshot) {
+                                                      if (snapshot
+                                                              .connectionState ==
+                                                          ConnectionState
+                                                              .done) {
+                                                        final jsonData =
+                                                            snapshot.data;
+                                                        List<
+                                                                Map<String,
+                                                                    dynamic>>
+                                                            listJsonUser =
+                                                            jsonData!
+                                                                .map((item) =>
+                                                                    item as Map<
+                                                                        String,
+                                                                        dynamic>)
+                                                                .toList();
+                                                        if (snapshot.data ==
+                                                            null) {
+                                                          return const Center(
+                                                            child: Text(
+                                                                'Something went wrong'),
+                                                          );
+                                                        }
+                                                        return InputMentionUser(
+                                                          Routes.rLocalURL,
+                                                          listJsonUser,
+                                                          functValueChange,
+                                                          labelInput:
+                                                              "Ajouter un utilisateur à déléguer",
+                                                          position:
+                                                              SuggestionPosition
+                                                                  .Top,
+                                                        );
+                                                      }
+                                                      return Center(
+                                                        child:
+                                                            const CircularProgressIndicator(),
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                              : Container(),
+                                          widget.modeEvent == "prive"
+                                              ? Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 20,
+                                                      vertical: 10),
+                                                  child: FutureBuilder(
+                                                    future:
+                                                        fetchGetAllUtilisateurs(),
+                                                    builder: (context,
+                                                        AsyncSnapshot<
+                                                                List<dynamic>>
+                                                            snapshot) {
+                                                      if (snapshot
+                                                              .connectionState ==
+                                                          ConnectionState
+                                                              .done) {
+                                                        final jsonData =
+                                                            snapshot.data;
+                                                        List<
+                                                                Map<String,
+                                                                    dynamic>>
+                                                            listJsonUser =
+                                                            jsonData!
+                                                                .map((item) =>
+                                                                    item as Map<
+                                                                        String,
+                                                                        dynamic>)
+                                                                .toList();
+                                                        if (snapshot.data ==
+                                                            null) {
+                                                          return const Center(
+                                                            child: Text(
+                                                                'Something went wrong'),
+                                                          );
+                                                        }
+                                                        return InputMentionUser(
+                                                          Routes.rLocalURL,
+                                                          listJsonUser,
+                                                          functValueChange,
+                                                          optionTexte:
+                                                              '${elementPseudo} ',
+                                                          position:
+                                                              SuggestionPosition
+                                                                  .Bottom,
+                                                        );
+                                                      }
+                                                      return Center(
+                                                        child:
+                                                            const CircularProgressIndicator(),
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                              : Container(),
+                                          ElevatedButton(
+                                              style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStatePropertyAll(
+                                                        CouleursPrefs
+                                                            .couleurRose),
+                                                shape:
+                                                    MaterialStateProperty.all<
+                                                        RoundedRectangleBorder>(
+                                                  RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                  ),
+                                                ),
+                                              ),
+                                              onPressed: () async {
+                                                //functArrayPseudo();
+                                                // modifEvenement();
+                                                // Navigator.of(buildContext)
+                                                //     .pop();
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 25,
+                                                        vertical: 5),
+                                                child: const Text("Modifier"),
+                                              ))
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: Icon(
+                      Icons.settings,
+                      color: CouleursPrefs.couleurBlanc,
+                    ))
+                : Container()
+          ],
         ),
         body: StreamBuilder(
             stream: getMessages(Duration(seconds: 1)),
