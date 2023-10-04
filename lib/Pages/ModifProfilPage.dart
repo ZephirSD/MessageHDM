@@ -72,7 +72,9 @@ class _ModifProfilContainerState extends State<ModifProfilContainer> {
     var request = http.Request('PUT', url);
     request.body = json.encode({
       "email": _emailModif.text,
+      "emailSession": session.get('email'),
       "pseudo": _pseudoModif.text,
+      "pseudoSession": session.get('pseudoUser'),
       "telephone": _telephoneModif.text
     });
     request.headers.addAll(headers);
