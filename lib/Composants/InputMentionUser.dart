@@ -7,8 +7,18 @@ class InputMentionUser extends StatefulWidget {
   final String domaineServer;
   final List<Map<String, dynamic>> listUserString;
   final void Function(String) onListMention;
-  InputMentionUser(this.domaineServer, this.listUserString, this.onListMention,
-      {this.trigger = "@"});
+  final SuggestionPosition position;
+  final String labelInput;
+  final String? optionTexte;
+  InputMentionUser(
+    this.domaineServer,
+    this.listUserString,
+    this.onListMention, {
+    this.trigger = "@",
+    this.position = SuggestionPosition.Top,
+    this.labelInput = "Ajouter des invités avec @",
+    this.optionTexte = null,
+  });
 
   @override
   State<InputMentionUser> createState() => _InputMentionUserState();
@@ -25,13 +35,14 @@ class _InputMentionUserState extends State<InputMentionUser> {
           borderRadius: BorderRadius.circular(25),
           border: Border.all(color: Colors.white, width: 2)),
       child: FlutterMentions(
+        defaultText: widget.optionTexte,
         style: TextStyle(color: Colors.white),
         // key: widget._mentionsKey,
         decoration: InputDecoration(
           fillColor: Colors.white,
           icon: Icon(Icons.people),
           iconColor: Colors.white,
-          hintText: "Ajouter des invités avec @",
+          hintText: widget.labelInput,
           hintStyle: TextStyle(
             color: Colors.white,
             fontSize: 14,
@@ -44,9 +55,11 @@ class _InputMentionUserState extends State<InputMentionUser> {
           });
           if (value.isNotEmpty && value[0] == '@') {
             widget.onListMention(valueTexte);
+          } else if (widget.optionTexte != null) {
+            widget.onListMention(widget.optionTexte!);
           }
         },
-        suggestionPosition: SuggestionPosition.Top,
+        suggestionPosition: widget.position,
         maxLines: 5,
         minLines: 1,
         mentions: [
