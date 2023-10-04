@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:messagehdm/Pages/MessagePages.dart';
+import 'package:messagehdm/Ressources/couleurs.dart';
 
 class CaseEvent extends StatelessWidget {
   final String title;
   final String idEvent;
-  CaseEvent(this.title, this.idEvent);
+  final String admimEvent;
+  final String modeEvent;
+  CaseEvent(this.title, this.idEvent, this.modeEvent, {this.admimEvent = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +17,16 @@ class CaseEvent extends StatelessWidget {
         onTap: () {
           print(title);
           session.set('event', idEvent);
+          session.set('adminEvent', admimEvent);
           print(session.get('event'));
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => MessagePage(title)));
+          print(session.get('adminEvent'));
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => MessagePage(title, idEvent, modeEvent)));
         },
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: Colors.deepPurple[400],
+            color: CouleursPrefs.couleurGrisFonce,
           ),
           height: 150,
           child: Center(
