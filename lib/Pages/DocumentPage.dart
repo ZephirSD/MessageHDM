@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:session_next/session_next.dart';
 import '../Composants/Fonctions/FunctFetchDataDocument.dart';
 import '../Composants/FutureFetchDoc.dart';
@@ -42,6 +43,12 @@ class _DocumentHomeState extends State<DocumentHome> {
     }
   }
 
+  Future<File> saveFile(PlatformFile file) async {
+    final fileStock = await getApplicationDocumentsDirectory();
+    final newFile = File('${fileStock.path}/${file.name}');
+    return File(file.path!).copy(newFile.path);
+  }
+
   envoiDocuments() async {
     var headers = {
       'Content-Type': 'application/json',
@@ -50,7 +57,13 @@ class _DocumentHomeState extends State<DocumentHome> {
     var request = http.Request('POST', Uri.parse('${_rpcUrl}/api/documents'));
 
     if (file != null) {
-      File fileDire = File(file!.path.toString());
+      File? fileDire = null;
+      if (Platform.isAndroid) {
+        final newFile = await saveFile(file!);
+        fileDire = File(newFile.path.toString());
+      } else {
+        fileDire = File(file!.path.toString());
+      }
       request.body = json.encode({
         "lien_fichier": file!.path.toString(),
         "nom_fichier": fileDire.path.split('/').last.split('.').first,
